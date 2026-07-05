@@ -571,7 +571,187 @@ export function DesignSystem() {
           </div>
         </section>
 
-        {/* 8. Scroll Reveal */}
+        {/* 8. xSyna Ecosystem Logos */}
+        <section className="space-y-12">
+          <div className="text-center md:text-left space-y-2">
+            <h2 className="text-3xl font-bold">xSyna Ecosystem</h2>
+            <p style={{ color: theme.textMuted }}>The primary brand identities.</p>
+          </div>
+          
+          <div className="flex flex-col items-center justify-center py-12 gap-8" style={{ backgroundColor: `${theme.card}44`, borderRadius: '1rem', border: `1px solid ${theme.primary}22` }}>
+            <motion.div
+              animate={{ scale: [1, 1.05, 1] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <XSynaLogo theme={theme} />
+            </motion.div>
+            <h3 className="text-2xl font-bold bg-clip-text text-transparent" style={{ backgroundImage: `linear-gradient(to right, ${theme.primary}, ${theme.secondary})` }}>xSyna</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full px-8 mt-8">
+              <div className="flex flex-col items-center text-center gap-4 p-6 rounded-xl border border-white/5 bg-white/5">
+                <svg width="48" height="48" viewBox="0 0 100 100" fill="none">
+                  <path d="M50 20 Q70 20 80 40 Q90 60 70 80 Q50 90 30 80 Q10 60 20 40 Q30 20 50 20Z" stroke={theme.primary} strokeWidth="2" strokeDasharray="4 4" />
+                  <circle cx="50" cy="50" r="8" fill={theme.primary} />
+                  <circle cx="50" cy="20" r="4" fill={theme.primary} />
+                  <circle cx="80" cy="40" r="4" fill={theme.primary} />
+                  <circle cx="70" cy="80" r="4" fill={theme.primary} />
+                  <circle cx="30" cy="80" r="4" fill={theme.primary} />
+                  <circle cx="20" cy="40" r="4" fill={theme.primary} />
+                  <path d="M50 50 L50 20 M50 50 L80 40 M50 50 L70 80 M50 50 L30 80 M50 50 L20 40" stroke={theme.primary} strokeWidth="2" />
+                </svg>
+                <h4 className="font-bold">SynAI</h4>
+                <p className="text-xs" style={{ color: theme.textMuted }}>Persönliche KI, die mit dir wächst</p>
+              </div>
+              <div className="flex flex-col items-center text-center gap-4 p-6 rounded-xl border border-white/5 bg-white/5">
+                <svg width="48" height="48" viewBox="0 0 100 100" fill="none">
+                  <rect x="25" y="25" width="50" height="50" rx="8" stroke={theme.primary} strokeWidth="3" />
+                  <path d="M15 35 L25 35 M15 50 L25 50 M15 65 L25 65" stroke={theme.primary} strokeWidth="3" />
+                  <path d="M75 35 L85 35 M75 50 L85 50 M75 65 L85 65" stroke={theme.primary} strokeWidth="3" />
+                  <path d="M35 15 L35 25 M50 15 L50 25 M65 15 L65 25" stroke={theme.primary} strokeWidth="3" />
+                  <path d="M35 75 L35 85 M50 75 L50 85 M65 75 L65 85" stroke={theme.primary} strokeWidth="3" />
+                  <path d="M35 50 L45 35 L55 65 L65 50" stroke={theme.secondary} strokeWidth="3" strokeLinejoin="round" />
+                </svg>
+                <h4 className="font-bold">xSyn</h4>
+                <p className="text-xs" style={{ color: theme.textMuted }}>Neuromorpher Intelligenz-Chip</p>
+              </div>
+              <div className="flex flex-col items-center text-center gap-4 p-6 rounded-xl border border-white/5 bg-white/5">
+                <svg width="48" height="48" viewBox="0 0 100 100" fill="none">
+                  <polygon points="30,25 45,33 45,50 30,58 15,50 15,33" fill={theme.primary} opacity="0.8" />
+                  <polygon points="70,42 85,50 85,67 70,75 55,67 55,50" fill={theme.secondary} opacity="0.8" />
+                  <motion.path 
+                    d="M30 42 C40 60, 60 30, 70 58" 
+                    stroke="#7B4FFF" 
+                    strokeWidth="4" 
+                    strokeDasharray="8 8"
+                    animate={{ strokeDashoffset: [24, 0] }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                  />
+                </svg>
+                <h4 className="font-bold">SynBridge</h4>
+                <p className="text-xs" style={{ color: theme.textMuted }}>Bytes ↔ Spikes Übersetzer</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 9. Neuromorphe Signale */}
+        <section className="space-y-12">
+          <div className="text-center md:text-left space-y-2">
+            <h2 className="text-3xl font-bold">Neuromorphe Signale</h2>
+            <p style={{ color: theme.textMuted }}>Spike-basierte Informationsverarbeitung.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="p-8 rounded-2xl flex flex-col items-center justify-center gap-6" style={{ backgroundColor: `${theme.card}aa`, border: `1px solid ${theme.primary}22` }}>
+              <h3 className="font-semibold w-full">Spike Train</h3>
+              <div className="h-16 w-full relative flex items-end overflow-hidden border-b border-white/20 pb-1">
+                {[...Array(8)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute bottom-0 w-1"
+                    style={{ backgroundColor: theme.secondary, left: `${(i + 1) * 11}%` }}
+                    initial={{ height: 0 }}
+                    animate={{ height: ["0%", "80%", "0%"] }}
+                    transition={{ duration: 0.5, delay: i * 0.2, repeat: Infinity, repeatDelay: 2 }}
+                  />
+                ))}
+              </div>
+            </div>
+            <div className="p-8 rounded-2xl flex flex-col items-center justify-center gap-6" style={{ backgroundColor: `${theme.card}aa`, border: `1px solid ${theme.primary}22` }}>
+              <h3 className="font-semibold w-full">Synapse Firing</h3>
+              <svg width="100%" height="60" viewBox="0 0 200 60" fill="none">
+                <circle cx="20" cy="30" r="10" fill={theme.bg} stroke={theme.primary} strokeWidth="2" />
+                <circle cx="180" cy="30" r="10" fill={theme.bg} stroke={theme.secondary} strokeWidth="2" />
+                <path d="M30 30 Q100 0 170 30" stroke="white" strokeOpacity="0.1" strokeWidth="2" />
+                <motion.circle 
+                  r="4" 
+                  fill={theme.primary}
+                  animate={{ cx: [30, 100, 170], cy: [30, 15, 30] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                />
+              </svg>
+            </div>
+            <div className="p-8 rounded-2xl flex flex-col items-center justify-center gap-6" style={{ backgroundColor: `${theme.card}aa`, border: `1px solid ${theme.primary}22` }}>
+              <h3 className="font-semibold w-full">Neural Weight</h3>
+              <div className="relative w-24 h-24 flex items-center justify-center">
+                <svg width="100" height="100" viewBox="0 0 100 100" className="-rotate-90">
+                  <circle cx="50" cy="50" r="40" fill="none" stroke="white" strokeOpacity="0.1" strokeWidth="8" />
+                  <motion.circle 
+                    cx="50" cy="50" r="40" fill="none" stroke={theme.secondary} strokeWidth="8"
+                    strokeDasharray="251.2"
+                    animate={{ strokeDashoffset: [251.2, 37.68, 251.2] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <span className="absolute text-xs font-mono">w:0.847</span>
+              </div>
+            </div>
+            <div className="p-8 rounded-2xl flex flex-col items-center justify-center gap-6" style={{ backgroundColor: `${theme.card}aa`, border: `1px solid ${theme.primary}22` }}>
+              <h3 className="font-semibold w-full">Collective Sync</h3>
+              <div className="relative w-32 h-32 flex items-center justify-center">
+                <motion.circle 
+                  className="w-12 h-12 rounded-full absolute"
+                  style={{ backgroundColor: `${theme.primary}33`, border: `2px solid ${theme.primary}` }}
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+                {[0, 72, 144, 216, 288].map((deg, i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute w-4 h-4 rounded-full"
+                    style={{ 
+                      backgroundColor: theme.secondary,
+                      transformOrigin: "60px center",
+                      left: "50%", top: "50%",
+                      marginLeft: "-60px", marginTop: "-8px",
+                      rotate: `${deg}deg`
+                    }}
+                    animate={{ scale: [1, 1.5, 1] }}
+                    transition={{ duration: 2, repeat: Infinity, delay: i * 0.2 }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 10. Extended Iconography */}
+        <section className="space-y-12">
+          <div className="text-center md:text-left space-y-2">
+            <h2 className="text-3xl font-bold">Extended Icon System</h2>
+            <p style={{ color: theme.textMuted }}>Additional glyphs for xSyna tools.</p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+            {[
+              { name: "Spike Wave", d: "M2 12h4v-8h4v16h4v-12h4v6h4" },
+              { name: "Neuron Network", d: "M12 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM4 18a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM20 18a3 3 0 1 0 0 6 3 3 0 0 0 0-6z M12 8L6 18 M12 8L18 18 M6 20L18 20" },
+              { name: "Chip Core", d: "M4 4h16v16H4V4z M8 4v16 M16 4v16 M4 8h16 M4 16h16" },
+              { name: "Bridge Path", d: "M4 20C4 20 12 20 12 12C12 4 20 4 20 4 M4 18v4h4 M16 2h4v4" },
+              { name: "Syn File", d: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M8 16h8" },
+              { name: ".weights", d: "M4 8l8-4 8 4-8 4-8-4z M4 13l8 4 8-4 M4 18l8 4 8-4" }
+            ].map((icon, i) => (
+              <motion.div 
+                key={i}
+                whileHover={{ scale: 1.05 }}
+                className="flex flex-col items-center justify-center p-6 rounded-2xl gap-4 group cursor-pointer"
+                style={{ backgroundColor: `${theme.card}aa`, border: `1px solid white`, borderColor: 'rgba(255,255,255,0.05)' }}
+              >
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" className="transition-transform group-hover:scale-110">
+                  <defs>
+                    <linearGradient id={`ext-grad-${i}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor={theme.primary} />
+                      <stop offset="100%" stopColor={theme.secondary} />
+                    </linearGradient>
+                  </defs>
+                  <path d={icon.d} stroke={`url(#ext-grad-${i})`} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span className="text-xs font-semibold text-center" style={{ color: theme.textMuted }}>{icon.name}</span>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
+        {/* 11. Scroll Reveal */}
         <section className="space-y-12 pb-24">
           <div className="text-center md:text-left space-y-2">
             <h2 className="text-3xl font-bold">Intersection Protocol</h2>
