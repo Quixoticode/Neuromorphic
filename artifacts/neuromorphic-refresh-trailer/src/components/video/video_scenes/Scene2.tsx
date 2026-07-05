@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
+import { Activity, Cpu, Network } from 'lucide-react';
 
 export function Scene2() {
   const [glitch, setGlitch] = useState(false);
@@ -10,6 +11,9 @@ export function Scene2() {
     }, 150);
     return () => clearInterval(interval);
   }, []);
+
+  const cardStyle = "bg-[#0a0f1a]/67 border border-white/5 backdrop-blur-[24px] rounded-2xl p-6 absolute";
+  const glowStyle = { boxShadow: 'inset 0 0 30px rgba(0, 240, 255, 0.13)' };
 
   return (
     <motion.div 
@@ -23,18 +27,60 @@ export function Scene2() {
       
       {/* Glitching UI cards */}
       <motion.div 
-        className={`absolute w-96 h-64 bg-white/5 border border-white/20 backdrop-blur-xl rounded-2xl flex flex-col p-6 ${glitch ? 'glitch-anim' : ''}`}
-        style={{ x: '-15vw', y: '-5vh', rotate: -5 }}
+        className={`${cardStyle} ${glitch ? 'glitch-anim' : ''}`}
+        style={{ ...glowStyle, x: '-25vw', y: '-15vh', rotate: -8 }}
         initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: [0, 0.8, 0.2, 0.9], x: ['-15vw', '-14vw', '-16vw', '-15vw'] }}
-        transition={{ duration: 3, times: [0, 0.2, 0.5, 1] }}
+        animate={{ opacity: [0, 0.8, 0.2, 0.9], x: ['-25vw', '-24vw', '-26vw', '-25vw'] }}
+        transition={{ duration: 3, times: [0, 0.2, 0.5, 1], repeat: Infinity, repeatType: 'reverse' }}
       >
-        <div className="w-1/2 h-4 bg-white/20 rounded mb-4" />
-        <div className="w-full h-2 bg-white/10 rounded mb-2" />
-        <div className="w-4/5 h-2 bg-white/10 rounded mb-8" />
-        <div className="mt-auto w-full h-12 bg-primary/20 border border-primary/50 rounded-lg flex items-center justify-center">
-          <div className="w-1/3 h-2 bg-primary/80 rounded" />
+        <div className="flex items-center gap-4 mb-4">
+          <div className="p-3 rounded-xl bg-[#00F0FF]/15">
+            <Cpu className="text-[#00F0FF] w-6 h-6" />
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold text-white">SynAI</h3>
+            <p className="text-sm text-[#8892b0]">Neural Core</p>
+          </div>
         </div>
+        <div className="text-3xl font-bold text-white">2.4B params</div>
+      </motion.div>
+
+      <motion.div 
+        className={`${cardStyle} ${glitch ? 'glitch-anim' : ''}`}
+        style={{ ...glowStyle, x: '10vw', y: '10vh', rotate: 5 }}
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: [0.9, 0.1, 0.8, 0], x: ['10vw', '11vw', '9vw', '10vw'] }}
+        transition={{ duration: 3.5, times: [0, 0.3, 0.7, 1], delay: 0.5, repeat: Infinity, repeatType: 'reverse' }}
+      >
+        <div className="flex items-center gap-4 mb-4">
+          <div className="p-3 rounded-xl bg-[#00F0FF]/15">
+            <Activity className="text-[#00F0FF] w-6 h-6" />
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold text-white">xSyn</h3>
+            <p className="text-sm text-[#8892b0]">Adaptive UI</p>
+          </div>
+        </div>
+        <div className="text-3xl font-bold text-white">847ms</div>
+      </motion.div>
+
+      <motion.div 
+        className={`${cardStyle} ${glitch ? 'glitch-anim' : ''}`}
+        style={{ ...glowStyle, x: '-5vw', y: '25vh', rotate: -3 }}
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: [0.2, 0.9, 0.3, 0.8], x: ['-5vw', '-4vw', '-6vw', '-5vw'] }}
+        transition={{ duration: 2.5, times: [0, 0.4, 0.6, 1], delay: 1, repeat: Infinity, repeatType: 'reverse' }}
+      >
+        <div className="flex items-center gap-4 mb-4">
+          <div className="p-3 rounded-xl bg-[#00F0FF]/15">
+            <Network className="text-[#00F0FF] w-6 h-6" />
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold text-white">SynBridge</h3>
+            <p className="text-sm text-[#8892b0]">Protocol v3</p>
+          </div>
+        </div>
+        <div className="text-3xl font-bold text-white">99.9%</div>
       </motion.div>
 
       {/* LEAKED text */}

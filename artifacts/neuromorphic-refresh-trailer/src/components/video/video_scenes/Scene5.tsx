@@ -6,9 +6,12 @@ export function Scene5() {
 
   useEffect(() => {
     const timers = [
-      setTimeout(() => setPhase(1), 1000),
-      setTimeout(() => setPhase(2), 2000),
-      setTimeout(() => setPhase(3), 4000), // fade out
+      setTimeout(() => setPhase(1), 500),  // Ecosystem text
+      setTimeout(() => setPhase(2), 1500), // Neural net
+      setTimeout(() => setPhase(3), 2000), // Nodes layer 2
+      setTimeout(() => setPhase(4), 2500), // Nodes layer 3
+      setTimeout(() => setPhase(5), 3500), // 2027 ref
+      setTimeout(() => setPhase(6), 4500), // fade out
     ];
     return () => timers.forEach(t => clearTimeout(t));
   }, []);
@@ -17,19 +20,46 @@ export function Scene5() {
     <motion.div 
       className="absolute inset-0 flex flex-col items-center justify-center bg-[#030508]"
       initial={{ opacity: 0 }}
-      animate={phase < 3 ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
+      animate={phase < 6 ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: phase < 3 ? 1 : 1.5 }}
+      transition={{ duration: phase < 6 ? 1 : 1.5 }}
     >
-      <div className="relative z-10 flex flex-col items-center">
+      <div className="relative z-10 flex flex-col items-center -mt-20">
         {/* Converging particles to Logo */}
         <motion.div 
-          className="text-5xl font-bold tracking-widest text-white mb-4 flex items-center gap-3"
+          className="text-5xl font-bold tracking-widest text-white mb-4 flex flex-col items-center gap-6"
           initial={{ filter: 'blur(20px)', opacity: 0, scale: 2 }}
           animate={{ filter: 'blur(0px)', opacity: 1, scale: 1 }}
           transition={{ duration: 1.5, ease: "easeOut" }}
         >
-          <div className="w-8 h-8 bg-primary shadow-[0_0_20px_#00F0FF] rounded-sm rotate-45" />
+          <svg width="80" height="80" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="logoGradS5" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#00F0FF" />
+                <stop offset="100%" stopColor="#FFB300" />
+              </linearGradient>
+            </defs>
+            <motion.path 
+              d="M20,20 Q50,50 80,80 M20,80 Q50,50 80,20" 
+              stroke="url(#logoGradS5)" 
+              strokeWidth="6" 
+              strokeLinecap="round" 
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 2, ease: "easeInOut" }}
+            />
+            <motion.circle 
+              cx="50" 
+              cy="50" 
+              r="10" 
+              fill="#030508" 
+              stroke="url(#logoGradS5)" 
+              strokeWidth="4"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 1, delay: 1, type: "spring" }}
+            />
+          </svg>
           <span>xSyna</span>
         </motion.div>
 
@@ -43,13 +73,49 @@ export function Scene5() {
         </motion.p>
       </div>
 
+      {/* Intelligence Model Diagram */}
+      <motion.div
+        className="absolute bottom-32 flex flex-col items-center"
+        initial={{ scale: 0, y: 100, opacity: 0 }}
+        animate={phase >= 2 ? { scale: 1, y: 0, opacity: 1 } : { scale: 0, y: 100, opacity: 0 }}
+        transition={{ type: "spring", stiffness: 100, damping: 20 }}
+      >
+        <div className="font-mono text-[10px] text-[#00F0FF] mb-4 tracking-widest uppercase">Intelligence Model v3</div>
+        <svg width="200" height="120" viewBox="0 0 200 120" fill="none">
+          {/* Edges */}
+          <path d="M40,20 L100,60 L160,20 M40,60 L100,60 L160,60 M40,100 L100,60 L160,100" stroke="#ffffff" strokeOpacity="0.1" strokeWidth="2" />
+          <motion.path d="M40,20 L100,60 M40,60 L100,60 M40,100 L100,60" stroke="#00F0FF" strokeOpacity="0.4" strokeWidth="2" initial={{ pathLength: 0 }} animate={phase >= 3 ? { pathLength: 1 } : { pathLength: 0 }} transition={{ duration: 0.5 }} />
+          <motion.path d="M100,60 L160,20 M100,60 L160,60 M100,60 L160,100" stroke="#7B4FFF" strokeOpacity="0.4" strokeWidth="2" initial={{ pathLength: 0 }} animate={phase >= 4 ? { pathLength: 1 } : { pathLength: 0 }} transition={{ duration: 0.5 }} />
+          
+          {/* Nodes */}
+          {/* Layer 1 */}
+          <circle cx="40" cy="20" r="4" fill="#00F0FF" fillOpacity={phase >= 2 ? 0.6 : 0.1} />
+          <circle cx="40" cy="60" r="4" fill="#00F0FF" fillOpacity={phase >= 2 ? 0.6 : 0.1} />
+          <circle cx="40" cy="100" r="4" fill="#00F0FF" fillOpacity={phase >= 2 ? 0.6 : 0.1} />
+          {/* Layer 2 */}
+          <circle cx="100" cy="60" r="6" fill="#7B4FFF" fillOpacity={phase >= 3 ? 0.8 : 0.1} />
+          {/* Layer 3 */}
+          <circle cx="160" cy="20" r="4" fill="#FFB300" fillOpacity={phase >= 4 ? 1 : 0.1} />
+          <circle cx="160" cy="60" r="4" fill="#FFB300" fillOpacity={phase >= 4 ? 1 : 0.1} />
+          <circle cx="160" cy="100" r="4" fill="#FFB300" fillOpacity={phase >= 4 ? 1 : 0.1} />
+        </svg>
+      </motion.div>
+
       <motion.div 
-        className="absolute bottom-12 font-mono text-primary/80 tracking-widest text-sm"
+        className="absolute bottom-16 flex flex-col items-center gap-2 font-mono text-primary/80 tracking-widest text-sm"
         initial={{ opacity: 0 }}
         animate={phase >= 2 ? { opacity: 1 } : { opacity: 0 }}
         transition={{ duration: 1 }}
       >
-        neuromorphic.live
+        <span>neuromorphic.live</span>
+        <motion.span 
+          className="text-[10px] text-[#8892b0]"
+          initial={{ opacity: 0 }}
+          animate={phase >= 5 ? { opacity: 1 } : { opacity: 0 }}
+          transition={{ duration: 2 }}
+        >
+          → 2027: Autonomous Evolution
+        </motion.span>
       </motion.div>
     </motion.div>
   );
