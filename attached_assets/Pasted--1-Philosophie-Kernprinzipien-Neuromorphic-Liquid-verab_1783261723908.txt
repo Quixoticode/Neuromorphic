@@ -1,0 +1,269 @@
+## 1. Philosophie & Kernprinzipien
+
+"Neuromorphic Liquid" verabschiedet sich von starren Rastern und dem künstlichen Cyberpunk-Look (Neon auf reinem Schwarz). Das menschliche Gehirn ist organisch, fließend, reaktiv und anpassungsfähig. Unser Design spiegelt diese Biologie wider:
+
+1. Organische Tiefe: Wir nutzen kein reines Schwarz, sondern tiefes Mitternachtsblau (Deep Cortex), um räumliche Tiefe zu erzeugen.
+2. Reaktive Physis: Elemente reagieren auf den Nutzer. Karten schweben ("Liquid Glass"), Buttons scannen ("Bio-Pulse") und Hintergründe formen neuronale Pfade zum Cursor des Nutzers.
+3. Atypografische Symbolik: Logos und Icons bestehen aus sauberen Vektor-Kurven, die sich wie sich teilende Zellen oder Synapsen verhalten.
+
+## 2. Das Farbspektrum (The Bio-Luminescent Palette)
+
+Wir reduzieren die Farben auf drei essenzielle Kerntöne, um maximale Eleganz und kognitiven Fokus zu gewährleisten.
+
+- Deep Cortex (Base/Background): #030508
+
+- Verwendung: Der unendliche Hintergrund, Card-Backgrounds (mit Transparenz).
+
+- Synaptic Cyan (Primary Action): #00F0FF
+
+- Verwendung: Elektrische Impulse, primäre Buttons, Links, Erfolgs-States.
+
+- Neural Amber (Secondary/Organic): #FFB300
+
+- Verwendung: Akzente, Warnungen, Symbole für das "kollektive Lernen" oder menschliche Aspekte.
+
+## 3. Typografie
+
+Wir nutzen hochmoderne, geometrische Schriftarten, die extrem sauber rendern.
+
+- Primary Font (Headlines & Body): Plus Jakarta Sans
+
+- Bietet maximale Klarheit und einen modernen Tech-Vibe ohne zu verspielt zu wirken.
+
+- Secondary Font (Code, Meta, Telemetrie): JetBrains Mono
+
+- Für alle System-Logs, Metriken und Hardware-Spezifikationen.
+
+## 4. Tailwind CSS Basis-Konfiguration
+
+Um das Design in einem neuen Projekt aufzusetzen, muss das tailwind.config Objekt wie folgt erweitert werden:
+
+tailwind.config = {  
+   theme: {  
+       extend: {  
+           fontFamily: {  
+               sans: ['Plus Jakarta Sans', 'sans-serif'],  
+               mono: ['JetBrains Mono', 'monospace'],  
+           },  
+           colors: {  
+               cortex: '#030508',  
+               cyan: { 400: '#33FFFF', 500: '#00F0FF', 600: '#00C2CC' },  
+               amber: { 400: '#FFC833', 500: '#FFB300', 600: '#CC8F00' }  
+           }  
+       }  
+   }  
+}  
+
+Zusätzlich muss im <body> Tag das Anti-Aliasing aktiviert werden, um Darstellungsfehler zu vermeiden:
+
+body {  
+   background-color: #030508;  
+   color: #ffffff;  
+   -webkit-font-smoothing: antialiased;  
+   -moz-osx-font-smoothing: grayscale;  
+}  
+
+## 5. UI Komponenten & CSS Snippets
+
+Die Kernelemente des Designs werden über maßgeschneiderte CSS-Klassen gesteuert, die mit Tailwind-Utility-Klassen kombiniert werden.
+
+### 5.1 Liquid Card (Glassmorphism & Hover Physics)
+
+Diese Karten verhalten sich wie flüssiges Glas. Beim Hover erzeugen sie eine organische Hebe-Bewegung und fangen das Licht (Cyan-Glow) auf.
+
+.liquid-card {  
+   background: rgba(15, 20, 25, 0.4);  
+   backdrop-filter: blur(24px);  
+   -webkit-backdrop-filter: blur(24px);  
+   border: 1px solid rgba(255, 255, 255, 0.05);  
+   border-radius: 24px;  
+   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),   
+               box-shadow 0.4s ease,   
+               border-color 0.4s ease;  
+   position: relative;  
+   overflow: hidden;  
+}  
+  
+.liquid-card:hover {  
+   transform: translateY(-4px);  
+   border-color: rgba(0, 240, 255, 0.3);  
+   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), inset 0 0 40px rgba(0, 240, 255, 0.05);  
+}  
+
+### 5.2 Bio-Button
+
+Ein transparenter Button, durch dessen Rand ein "Lichtimpuls" wandert, sobald man mit der Maus darüber fährt.
+
+.btn-bio {  
+   position: relative;  
+   background: transparent;  
+   color: #fff;  
+   border: 1px solid rgba(0, 240, 255, 0.5);  
+   border-radius: 9999px;  
+   overflow: hidden;  
+   transition: all 0.3s ease;  
+   cursor: pointer;  
+}  
+  
+.btn-bio::before {  
+   content: '';  
+   position: absolute;  
+   top: 0; left: -100%;  
+   width: 100%; height: 100%;  
+   background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.2), transparent);  
+   transition: left 0.5s ease;  
+}  
+  
+.btn-bio:hover::before {   
+   left: 100%;   
+}  
+  
+.btn-bio:hover, .btn-bio.active {  
+   background: rgba(0, 240, 255, 0.15);  
+   box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);  
+   border-color: #00F0FF;  
+}  
+
+### 5.3 Text Gradient (Clipping-Fix)
+
+Für markante Headlines wird ein Verlauf von Cyan zu Amber genutzt. Das padding-bottom verhindert, dass Buchstaben wie "g" oder "j" abgeschnitten werden.
+
+.text-liquid {  
+   background: linear-gradient(135deg, #00F0FF, #FFB300);  
+   -webkit-background-clip: text;  
+   -webkit-text-fill-color: transparent;  
+   background-clip: text;  
+   padding-bottom: 0.1em;   
+}  
+
+### 5.4 Scroll Reveal Automation
+
+Flüssiges Einblenden von Inhalten beim Scrollen (biologisches Erwachen).
+
+CSS:
+
+.reveal {  
+   opacity: 0;  
+   transform: translateY(40px);  
+   transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);  
+}  
+.reveal.active {  
+   opacity: 1;  
+   transform: translateY(0);  
+}  
+
+JavaScript:
+
+function reveal() {  
+   var reveals = document.querySelectorAll(".reveal");  
+   for (var i = 0; i < reveals.length; i++) {  
+       var windowHeight = window.innerHeight;  
+       var elementTop = reveals[i].getBoundingClientRect().top;  
+       if (elementTop < windowHeight - 100) {  
+           reveals[i].classList.add("active");  
+       }  
+   }  
+}  
+window.addEventListener("scroll", reveal);  
+reveal(); // Trigger on load  
+
+## 6. Atypografische Vektor-Logos
+
+Logos werden nicht als Bilder eingebunden, sondern nativ über <svg> Code gezeichnet. Dies garantiert verlustfreie Skalierung und erlaubt Animationen (z.B. Hover-Effekte auf Pfaden).
+
+Beispiel: Das xSyna Main Brand Logo
+
+<svg width="32" height="32" viewBox="0 0 100 100" class="hover:scale-110 transition-transform">  
+   <defs>  
+       <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">  
+           <stop offset="0%" stop-color="#00F0FF" />  
+           <stop offset="100%" stop-color="#FFB300" />  
+       </linearGradient>  
+   </defs>  
+   <!-- Organisches X (Kurven) -->  
+   <path d="M 20 20 C 50 20, 50 80, 80 80" stroke="url(#logoGrad)" stroke-width="8" stroke-linecap="round" fill="none"/>  
+   <path d="M 80 20 C 50 20, 50 80, 20 80" stroke="url(#logoGrad)" stroke-width="8" stroke-linecap="round" fill="none"/>  
+   <!-- Zentraler Nukleus -->  
+   <circle cx="50" cy="50" r="10" fill="#030508" stroke="url(#logoGrad)" stroke-width="4"/>  
+   <circle cx="50" cy="50" r="4" fill="#FFFFFF"/>  
+</svg>  
+
+## 7. Der Reaktive WebGL Hintergrund (Three.js)
+
+Das Markenzeichen der Landingpage. Ein interaktives 3D-Particle-Network, das Distanzen misst, Linien zieht (Synapsen) und sich zur Maus des Nutzers neigt.
+
+Integration Setup:
+
+1. Div in den Hintergrund legen: <div id="neural-canvas" style="position: fixed; top: 0; left: 0; z-index: -10; pointer-events: none;"></div>
+2. Three.js laden: <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+Kern-Logik (Minimal-Version):
+
+const canvas = document.getElementById('neural-canvas');  
+const scene = new THREE.Scene();  
+scene.fog = new THREE.FogExp2(0x030508, 0.001); // Erzeugt Tiefenunschärfe im Cortex-Ton  
+  
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);  
+camera.position.z = 400;  
+  
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });  
+renderer.setSize(window.innerWidth, window.innerHeight);  
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));   
+canvas.appendChild(renderer.domElement);  
+  
+// (Die restliche Logik umfasst das Generieren von Float32Arrays für Partikel,   
+// das Prüfen der Distanz in der animate() Schleife und das Ziehen von   
+// LineBasicMaterials zwischen nahestehenden Knoten. Siehe Landingpage-Code   
+// für die vollständige physikalische Umsetzung).![Attachment.png](blob:capacitor://localhost/cbdc4d9b-7905-40b5-8e0c-aec4eb902ea5) Bietet maximale Klarheit und einen modernen Tech-Vibe ohne zu verspielt zu wirken.
+
+ ![Attachment.png](blob:capacitor://localhost/cbdc4d9b-7905-40b5-8e0c-aec4eb902ea5)Secondary Font (Code, Meta, Telemetrie): ⁠JetBrains Mono⁠
+
+ ![Attachment.png](blob:capacitor://localhost/cbdc4d9b-7905-40b5-8e0c-aec4eb902ea5) Für alle System-Logs, Metriken und Hardware-Spezifikationen.
+
+4. Tailwind CSS Basis-Konfiguration
+
+Um das Design in einem neuen Projekt aufzusetzen, muss das ⁠tailwind.config⁠ Objekt wie folgt erweitert werden:
+
+Zusätzlich muss im ⁠<body>⁠ Tag das Anti-Aliasing aktiviert werden, um Darstellungsfehler zu vermeiden:
+
+5. UI Komponenten & CSS Snippets
+
+Die Kernelemente des Designs werden über maßgeschneiderte CSS-Klassen gesteuert, die mit Tailwind-Utility-Klassen kombiniert werden.
+
+5.1 Liquid Card (Glassmorphism & Hover Physics)
+
+Diese Karten verhalten sich wie flüssiges Glas. Beim Hover erzeugen sie eine organische Hebe-Bewegung und fangen das Licht (Cyan-Glow) auf.
+
+5.2 Bio-Button
+
+Ein transparenter Button, durch dessen Rand ein "Lichtimpuls" wandert, sobald man mit der Maus darüber fährt.
+
+5.3 Text Gradient (Clipping-Fix)
+
+Für markante Headlines wird ein Verlauf von Cyan zu Amber genutzt. Das ⁠padding-bottom⁠ verhindert, dass Buchstaben wie "g" oder "j" abgeschnitten werden.
+
+5.4 Scroll Reveal Automation
+
+Flüssiges Einblenden von Inhalten beim Scrollen (biologisches Erwachen).
+
+CSS:
+
+JavaScript:
+
+6. Atypografische Vektor-Logos
+
+Logos werden nicht als Bilder eingebunden, sondern nativ über ⁠<svg>⁠ Code gezeichnet. Dies garantiert verlustfreie Skalierung und erlaubt Animationen (z.B. Hover-Effekte auf Pfaden).
+
+Beispiel: Das xSyna Main Brand Logo
+
+7. Der Reaktive WebGL Hintergrund (Three.js)
+
+Das Markenzeichen der Landingpage. Ein interaktives 3D-Particle-Network, das Distanzen misst, Linien zieht (Synapsen) und sich zur Maus des Nutzers neigt.
+
+Integration Setup:
+
+1 Div in den Hintergrund legen: ⁠<div id="neural-canvas" style="position: fixed; top: 0; left: 0; z-index: -10; pointer-events: none;"></div>⁠
+
+2 Three.js laden: ⁠<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>⁠
+
+Kern-Logik (Minimal-Version):
