@@ -1,0 +1,31 @@
+kind = "video"
+previewPath = "/neuromorphic-refresh-trailer/"
+title = "Neuromorphic Refresh — Trailer"
+version = "1.0.0"
+id = "artifacts/neuromorphic-refresh-trailer"
+router = "path"
+
+[[integratedSkills]]
+name = "video-js"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/neuromorphic-refresh-trailer/" ]
+localPort = 21536
+
+[services.development]
+run = "pnpm --filter @workspace/neuromorphic-refresh-trailer run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/neuromorphic-refresh-trailer", "run", "build" ]
+publicDir = "artifacts/neuromorphic-refresh-trailer/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21536"
+BASE_PATH = "/neuromorphic-refresh-trailer/"
