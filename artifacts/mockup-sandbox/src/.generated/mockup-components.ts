@@ -2,5 +2,6 @@
 type ModuleMap = Record<string, () => Promise<Record<string, unknown>>>;
 export const modules: ModuleMap = {
   "./components/mockups/neuromorphic-liquid/DesignSystem.tsx": () => import("../components/mockups/neuromorphic-liquid/DesignSystem.tsx"),
+  "./components/mockups/neuromorphic-liquid/DesignSystemV3.tsx": () => import("../components/mockups/neuromorphic-liquid/DesignSystemV3.tsx"),
   "./components/mockups/neuromorphic-liquid/LoginScreen.tsx": () => import("../components/mockups/neuromorphic-liquid/LoginScreen.tsx")
 };
