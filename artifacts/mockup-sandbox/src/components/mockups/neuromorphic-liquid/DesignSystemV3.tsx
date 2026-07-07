@@ -1,697 +1,785 @@
-import { useState, useEffect, useRef, useMemo } from "react";
-import { motion, AnimatePresence, useAnimation } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  Brain,
-  Waves,
-  Droplets,
-  Zap,
-  Network,
-  Cpu,
-  Shield,
-  Layers,
-  Orbit,
-  Activity,
-  Database,
-  Sparkles,
-  ArrowRight,
+  Eye, EyeOff, ArrowRight, Check, ChevronLeft,
+  Mail, Lock, User, Shield, Smartphone, Bell, Fingerprint,
+  LogOut, Zap, Activity, Database,
 } from "lucide-react";
 
-// --- Theme Definitions ---
-const THEMES = {
-  darkCortex: {
-    id: "darkCortex",
-    bg: "#030508",
-    surface1: "#060b12",
-    surface2: "#0a1220",
-    primary: "#00E5FF",
-    secondary: "#FFB300",
-    accent3: "#7B4FFF",
-    text: "#E8F4FF",
-    muted: "#4A6080",
-    name: "Dark Cortex",
-  },
-  midnightBio: {
-    id: "midnightBio",
-    bg: "#030508",
-    surface1: "#060b12",
-    surface2: "#0a1220",
-    primary: "#7B4FFF",
-    secondary: "#00E5FF",
-    accent3: "#FFB300",
-    text: "#E8F4FF",
-    muted: "#4A6080",
-    name: "Midnight Bio",
-  },
-  bioluminescent: {
-    id: "bioluminescent",
-    bg: "#030508",
-    surface1: "#060b12",
-    surface2: "#0a1220",
-    primary: "#00FF88",
-    secondary: "#FFB300",
-    accent3: "#00E5FF",
-    text: "#E8F4FF",
-    muted: "#4A6080",
-    name: "Bioluminescent",
-  },
+// ─── Theme ──────────────────────────────────────────────────────────────────
+const T = {
+  bg:      "#020407",
+  bg2:     "#07101a",
+  surface: "#0c1624",
+  border:  "rgba(255,255,255,0.07)",
+  primary: "#00E5FF",
+  secondary:"#FFB300",
+  accent:  "#7B4FFF",
+  success: "#00FF88",
+  error:   "#FF4060",
+  text:    "#E8F4FF",
+  muted:   "#4A6080",
 };
 
-type Theme = keyof typeof THEMES;
-
-// --- CSS styles & Keyframes ---
+// ─── Global Styles ──────────────────────────────────────────────────────────
 const GlobalStyles = () => (
   <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Space+Grotesk:wght@300..700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=JetBrains+Mono:wght@400;700&display=swap');
 
-    .font-display {
-      font-family: 'Space Grotesk', sans-serif;
-    }
-    .font-body {
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    .sso-wrap {
       font-family: 'DM Sans', sans-serif;
+      background: ${T.bg};
+      color: ${T.text};
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: env(safe-area-inset-top, 24px) env(safe-area-inset-right, 16px) env(safe-area-inset-bottom, 24px) env(safe-area-inset-left, 16px);
+      overflow-x: hidden;
+      overflow-y: auto;
     }
-    
-    @keyframes liquidMorph {
-      0%   { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
-      33%  { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
-      66%  { border-radius: 40% 60% 30% 70% / 40% 40% 60% 50%; }
-      100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
-    }
-    
-    .blob-1 { animation: liquidMorph 15s ease-in-out infinite alternate; }
-    .blob-2 { animation: liquidMorph 22s ease-in-out infinite alternate-reverse; }
-    .blob-3 { animation: liquidMorph 18s ease-in-out infinite alternate; }
-    .blob-4 { animation: liquidMorph 25s ease-in-out infinite alternate-reverse; }
 
-    @keyframes gradientSweep {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+    .font-display { font-family: 'Space Grotesk', sans-serif; }
+    .font-mono    { font-family: 'JetBrains Mono', monospace; }
+
+    @keyframes blobMorph {
+      0%   { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+      25%  { border-radius: 70% 30% 40% 60% / 60% 40% 70% 40%; }
+      50%  { border-radius: 30% 70% 60% 40% / 50% 70% 30% 60%; }
+      75%  { border-radius: 60% 40% 30% 70% / 30% 60% 40% 70%; }
+      100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
     }
-    
-    .bg-sweep {
-      background-size: 200% 200%;
-      animation: gradientSweep 20s ease infinite;
+
+    @keyframes liqRipple {
+      0%   { transform: translate(-50%,-50%) scale(0); opacity: 0.55; }
+      100% { transform: translate(-50%,-50%) scale(7); opacity: 0; }
     }
-    
-    /* Hide scrollbar for clean horizontal scroll */
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
+
+    .liq-ripple {
+      position: absolute;
+      width: 70px; height: 70px;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: liqRipple 0.75s ease-out forwards;
     }
-    .no-scrollbar {
-      -ms-overflow-style: none;  /* IE and Edge */
-      scrollbar-width: none;  /* Firefox */
+
+    /* kill iOS autofill yellow */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus {
+      -webkit-text-fill-color: ${T.text};
+      -webkit-box-shadow: 0 0 0 1000px ${T.bg2} inset;
+      transition: background-color 5000s;
     }
+
+    /* hide number spinners */
+    input[type=number]::-webkit-outer-spin-button,
+    input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
   `}</style>
 );
 
-// --- Background Component ---
-const LiquidBackground = ({ theme, scrollX }: { theme: typeof THEMES[Theme]; scrollX: number }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  // Ripple effect on interaction
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    let ripples: Array<{ x: number; y: number; radius: number; alpha: number; maxRadius: number }> = [];
-
-    const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-    resize();
-    window.addEventListener("resize", resize);
-
-    const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      for (let i = ripples.length - 1; i >= 0; i--) {
-        const r = ripples[i];
-        r.radius += 2;
-        r.alpha -= 0.02;
-
-        if (r.alpha <= 0) {
-          ripples.splice(i, 1);
-          continue;
-        }
-
-        ctx.beginPath();
-        ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
-        ctx.strokeStyle = `${theme.primary}${Math.floor(r.alpha * 255).toString(16).padStart(2, '0')}`;
-        ctx.lineWidth = 2;
-        ctx.stroke();
-      }
-      requestAnimationFrame(draw);
-    };
-    const animId = requestAnimationFrame(draw);
-
-    const handlePointer = (e: PointerEvent) => {
-      ripples.push({
-        x: e.clientX,
-        y: e.clientY,
-        radius: 0,
-        alpha: 0.8,
-        maxRadius: 150
-      });
-    };
-    
-    window.addEventListener("pointerdown", handlePointer);
-    window.addEventListener("pointermove", (e) => {
-      if (Math.random() > 0.9) handlePointer(e); // occasional ripple on move
-    });
-
-    return () => {
-      window.removeEventListener("resize", resize);
-      window.removeEventListener("pointerdown", handlePointer);
-      cancelAnimationFrame(animId);
-    };
-  }, [theme]);
-
-  return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 bg-sweep"
-         style={{ background: `linear-gradient(45deg, ${theme.bg}, ${theme.surface1}, ${theme.bg})` }}>
-      
-      {/* Flowing gradient bands */}
-      <div className="absolute inset-0 opacity-20 bg-sweep mix-blend-screen"
-           style={{ backgroundImage: `linear-gradient(120deg, transparent, ${theme.primary}22, transparent, ${theme.accent3}22, transparent)` }} />
-
-      {/* Morphing Blobs — 3D parallax depth layers */}
-      {/* Layer 1: farthest back, slowest parallax (depth factor 0.05) */}
-      <motion.div 
-        className="blob-1 absolute blur-[100px] rounded-full mix-blend-screen"
-        style={{ width: '800px', height: '800px', backgroundColor: `${theme.primary}1A`, left: '-20%', top: '-20%' }}
-        animate={{ x: [0 - scrollX * 0.05, 100 - scrollX * 0.05, 0 - scrollX * 0.05], y: [0, 50, 0] }}
-        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-      />
-      {/* Layer 2: mid depth (depth factor 0.12) */}
-      <motion.div 
-        className="blob-2 absolute blur-[120px] rounded-full mix-blend-screen"
-        style={{ width: '900px', height: '900px', backgroundColor: `${theme.secondary}14`, right: '-10%', bottom: '-10%' }}
-        animate={{ x: [0 - scrollX * 0.12, -100 - scrollX * 0.12, 0 - scrollX * 0.12], y: [0, -50, 0] }}
-        transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-      />
-      {/* Layer 3: closest, fastest parallax (depth factor 0.22) */}
-      <motion.div 
-        className="blob-3 absolute blur-[90px] rounded-full mix-blend-screen"
-        style={{ width: '600px', height: '600px', backgroundColor: `${theme.accent3}0F`, left: '40%', top: '30%' }}
-        animate={{ x: [0 - scrollX * 0.22, 50 - scrollX * 0.22, -50 - scrollX * 0.22, 0 - scrollX * 0.22], y: [0, -50, 50, 0] }}
-        transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-      />
-      
-      {/* Ripple Canvas */}
-      <canvas ref={canvasRef} className="absolute inset-0 z-10 opacity-60 mix-blend-screen" />
-    </div>
-  );
+// ─── Liquid Button ───────────────────────────────────────────────────────────
+type BtnVariant = "primary" | "secondary" | "accent" | "ghost" | "danger";
+interface LiqBtnProps {
+  children: React.ReactNode;
+  onClick?: () => void;
+  variant?: BtnVariant;
+  fullWidth?: boolean;
+  type?: "button" | "submit";
+  disabled?: boolean;
+  size?: "sm" | "md" | "lg";
+}
+const variantBg: Record<BtnVariant, string> = {
+  primary:   T.primary,
+  secondary: T.secondary,
+  accent:    T.accent,
+  ghost:     "transparent",
+  danger:    T.error,
 };
 
-// --- XSyna Logo ---
-const Logo = ({ theme }: { theme: typeof THEMES[Theme] }) => (
-  <div className="relative flex items-center justify-center w-48 h-48">
-    <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full z-10 drop-shadow-2xl">
-      <defs>
-        <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor={theme.primary} />
-          <stop offset="100%" stopColor={theme.secondary} />
-        </linearGradient>
-      </defs>
-      <path d="M20,20 Q50,50 80,80 M20,80 Q50,50 80,20" stroke="url(#logoGrad)" strokeWidth="6" strokeLinecap="round" />
-      <circle cx="50" cy="50" r="10" fill={theme.bg} stroke="url(#logoGrad)" strokeWidth="4" />
-    </svg>
-    {/* Axons */}
-    <svg viewBox="0 0 200 200" className="absolute inset-[-50%] w-[200%] h-[200%] z-0 opacity-50">
-      {[...Array(8)].map((_, i) => (
-        <motion.line
-          key={i}
-          x1="100" y1="100"
-          x2={100 + Math.cos((i * Math.PI) / 4) * 80}
-          y2={100 + Math.sin((i * Math.PI) / 4) * 80}
-          stroke={theme.primary}
-          strokeWidth="2"
-          strokeLinecap="round"
-          initial={{ strokeDasharray: "0 200", strokeDashoffset: 0 }}
-          animate={{ strokeDasharray: ["0 200", "200 0", "0 200"] }}
-          transition={{ duration: 4, delay: i * 0.2, repeat: Infinity, ease: "easeInOut" }}
+const LiquidButton = ({ children, onClick, variant = "primary", fullWidth, type = "button", disabled, size = "md" }: LiqBtnProps) => {
+  const [ripples, setRipples] = useState<{id:number;x:number;y:number}[]>([]);
+  const [down, setDown] = useState(false);
+
+  const fire = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (disabled) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    const id = Date.now() + Math.random();
+    setRipples(p => [...p, { id, x: e.clientX - r.left, y: e.clientY - r.top }]);
+    setDown(true);
+    setTimeout(() => { setRipples(p => p.filter(x => x.id !== id)); }, 760);
+    setTimeout(() => setDown(false), 140);
+    onClick?.();
+  };
+
+  const bg   = variantBg[variant];
+  const isGhost = variant === "ghost";
+  const pad  = { sm:"8px 18px", md:"13px 28px", lg:"18px 44px" }[size];
+  const fz   = { sm:"13px", md:"15px", lg:"17px" }[size];
+  const h    = { sm:"40px", md:"52px", lg:"64px" }[size];
+  const textColor = isGhost ? T.muted : (variant === "primary" ? T.bg : "#fff");
+
+  return (
+    <motion.button
+      type={type}
+      disabled={disabled}
+      onPointerDown={fire}
+      animate={{ scale: down ? 0.962 : 1 }}
+      whileHover={!disabled ? { scale: 1.018 } : {}}
+      transition={{ type:"spring", stiffness:500, damping:28 }}
+      style={{
+        position:"relative", overflow:"hidden",
+        borderRadius:"14px",
+        border: isGhost ? `1px solid ${T.border}` : "none",
+        background: isGhost ? "rgba(255,255,255,0.03)" : `linear-gradient(130deg, ${bg}ee 0%, ${bg}99 100%)`,
+        color: textColor,
+        fontFamily:"'Space Grotesk', sans-serif",
+        fontWeight:600, fontSize:fz, letterSpacing:"0.02em",
+        padding:pad, height:h,
+        width: fullWidth ? "100%" : "auto",
+        cursor: disabled ? "not-allowed" : "pointer",
+        opacity: disabled ? 0.38 : 1,
+        boxShadow: isGhost ? "none" : `0 0 22px ${bg}28, 0 2px 12px ${bg}18`,
+        transition:"box-shadow 0.3s",
+        display:"flex", alignItems:"center", justifyContent:"center",
+      }}
+    >
+      {ripples.map(rp => (
+        <span
+          key={rp.id}
+          className="liq-ripple"
+          style={{
+            left: rp.x, top: rp.y,
+            background: `radial-gradient(circle, ${bg}55 0%, transparent 70%)`,
+          }}
         />
       ))}
-    </svg>
-  </div>
+      <span style={{ position:"relative", zIndex:1, display:"flex", alignItems:"center", justifyContent:"center", gap:"8px" }}>
+        {children}
+      </span>
+    </motion.button>
+  );
+};
+
+// ─── Spinner (reused) ────────────────────────────────────────────────────────
+const Spinner = ({ color = T.bg }: { color?: string }) => (
+  <motion.div
+    animate={{ rotate: 360 }}
+    transition={{ duration:1, repeat:Infinity, ease:"linear" }}
+    style={{ width:18, height:18, borderRadius:"50%", border:`2.5px solid ${color}30`, borderTop:`2.5px solid ${color}` }}
+  />
 );
 
-// --- Glass Card ---
-const GlassCard3D = ({ title, subtitle, icon: Icon, stat, theme }: any) => {
-  const [rotateX, setRotateX] = useState(0);
-  const [rotateY, setRotateY] = useState(0);
-  const [blobPos, setBlobPos] = useState({ x: 0, y: 0 });
-  const [isHovered, setIsHovered] = useState(false);
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    
-    // Max rotation 12deg
-    const rotateXValue = ((y - centerY) / centerY) * -12;
-    const rotateYValue = ((x - centerX) / centerX) * 12;
-    
-    setRotateX(rotateXValue);
-    setRotateY(rotateYValue);
-    setBlobPos({ x, y });
-  };
+// ─── Liquid Input ────────────────────────────────────────────────────────────
+interface LiqInputProps {
+  label?: string;
+  type?: string;
+  value: string;
+  onChange: (v: string) => void;
+  icon?: React.ComponentType<any>;
+  iconRight?: React.ReactNode;
+  placeholder?: string;
+  error?: string;
+  autoComplete?: string;
+}
+const LiquidInput = ({ label, type="text", value, onChange, icon:Icon, iconRight, placeholder, error, autoComplete }: LiqInputProps) => {
+  const [focused, setFocused] = useState(false);
 
   return (
-    <motion.div
-      className="relative p-8 rounded-3xl backdrop-blur-2xl border flex flex-col justify-between overflow-hidden"
-      style={{ 
-        backgroundColor: "rgba(255, 255, 255, 0.04)", 
-        borderColor: "rgba(255, 255, 255, 0.08)",
-        height: '240px',
-        transformPerspective: 800
-      }}
-      animate={{ rotateX: isHovered ? rotateX : 0, rotateY: isHovered ? rotateY : 0 }}
-      transition={{ type: "spring", stiffness: 300, damping: 30, mass: 20 }}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <div 
-        className="absolute w-40 h-40 rounded-full mix-blend-screen pointer-events-none transition-opacity duration-300"
-        style={{ 
-          background: `radial-gradient(circle, ${theme.primary}44 0%, transparent 70%)`,
-          transform: `translate(${blobPos.x - 80}px, ${blobPos.y - 80}px)`,
-          opacity: isHovered ? 1 : 0
-        }}
-      />
-      
-      <div className="relative z-10 flex items-start justify-between">
-        <div className="p-4 rounded-2xl" style={{ backgroundColor: `${theme.primary}22`, color: theme.primary }}>
-          <Icon size={32} strokeWidth={1.5} />
-        </div>
-        <div className="text-right">
-          <div className="text-4xl font-display font-bold" style={{ color: theme.text }}>{stat}</div>
-        </div>
-      </div>
-      <div className="relative z-10 mt-auto">
-        <h3 className="text-xl font-display font-bold mb-1" style={{ color: theme.text }}>{title}</h3>
-        <p className="font-body text-sm" style={{ color: theme.muted }}>{subtitle}</p>
-      </div>
-    </motion.div>
-  );
-};
-
-
-// --- Liquid States Demos ---
-const WaveProgressBar = ({ theme }: { theme: any }) => {
-  return (
-    <div className="h-12 w-full relative rounded-full overflow-hidden border" style={{ borderColor: `${theme.primary}33`, backgroundColor: `${theme.surface1}88` }}>
-      <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
-        <motion.path
-          d="M0,24 Q50,0 100,24 T200,24 T300,24 T400,24 T500,24 V48 H0 Z"
-          fill={theme.primary}
-          opacity={0.3}
-          animate={{ x: [-100, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+    <div>
+      {label && (
+        <label style={{
+          display:"block", fontSize:"11px", fontWeight:700,
+          letterSpacing:"0.1em", textTransform:"uppercase",
+          color: focused ? T.primary : T.muted,
+          marginBottom:"8px",
+          fontFamily:"'Space Grotesk', sans-serif",
+          transition:"color 0.3s",
+        }}>{label}</label>
+      )}
+      <div style={{ position:"relative" }}>
+        {Icon && (
+          <div style={{
+            position:"absolute", left:"15px", top:"50%", transform:"translateY(-50%)",
+            color: focused ? T.primary : T.muted,
+            transition:"color 0.3s", pointerEvents:"none", zIndex:1,
+            display:"flex", alignItems:"center",
+          }}>
+            <Icon size={17} strokeWidth={1.6} />
+          </div>
+        )}
+        <input
+          type={type} value={value}
+          onChange={e => onChange(e.target.value)}
+          placeholder={placeholder}
+          autoComplete={autoComplete}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          style={{
+            width:"100%",
+            background: T.bg2,
+            border:`1.5px solid ${focused ? T.primary+"66" : error ? T.error+"50" : T.border}`,
+            borderRadius:"13px",
+            color: T.text, fontSize:"15px",
+            fontFamily:"'DM Sans', sans-serif",
+            padding: Icon ? "14px 44px 14px 46px" : "14px 16px",
+            paddingRight: iconRight ? "46px" : undefined,
+            outline:"none",
+            WebkitAppearance:"none",
+            transition:"border-color 0.25s, box-shadow 0.25s",
+            boxShadow: focused
+              ? `0 0 0 3px ${T.primary}14, 0 1px 18px ${T.primary}0a`
+              : error ? `0 0 0 3px ${T.error}12` : "none",
+          }}
         />
-        <motion.path
-          d="M0,24 Q50,48 100,24 T200,24 T300,24 T400,24 T500,24 V48 H0 Z"
-          fill={theme.primary}
-          opacity={0.6}
-          animate={{ x: [-100, 0] }}
-          transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-        />
-      </svg>
-    </div>
-  );
-};
-
-const LiquidFill = ({ theme }: { theme: any }) => {
-  return (
-    <div className="w-32 h-32 rounded-full border-4 relative overflow-hidden flex items-center justify-center" style={{ borderColor: `${theme.primary}44`, backgroundColor: `${theme.surface1}` }}>
-      <motion.div
-        className="absolute bottom-0 w-[200%] h-[200%] blob-1"
-        style={{ backgroundColor: theme.primary, opacity: 0.8, borderRadius: '40%' }}
-        animate={{ y: [100, -20, 100], rotate: [0, 360] }}
-        transition={{ y: { duration: 8, repeat: Infinity, ease: "easeInOut" }, rotate: { duration: 5, repeat: Infinity, ease: "linear" } }}
-      />
-      <div className="relative z-10 font-display font-bold text-xl mix-blend-difference text-white">74%</div>
-    </div>
-  );
-};
-
-const MorphingDataChip = ({ theme }: { theme: any }) => {
-  return (
-    <motion.div
-      className="w-32 h-32 flex items-center justify-center font-body text-sm font-bold text-center"
-      style={{ backgroundColor: `${theme.secondary}22`, color: theme.secondary, border: `1px solid ${theme.secondary}66` }}
-      animate={{ borderRadius: ["20%", "50%", "30%", "40%", "20%"] }}
-      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-    >
-      Syncing...
-    </motion.div>
-  );
-};
-
-const FlowingParticleStream = ({ theme }: { theme: any }) => {
-  return (
-    <div className="relative w-full h-32 flex items-center border rounded-2xl px-6" style={{ borderColor: `${theme.accent3}44`, backgroundColor: `${theme.surface1}88` }}>
-      <div className="w-4 h-4 rounded-full" style={{ backgroundColor: theme.primary }} />
-      <div className="flex-1 relative h-full">
-        <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
-          <path id="flowPath" d="M0,64 Q100,20 200,64 T400,64" fill="none" stroke={theme.accent3} strokeWidth="2" strokeOpacity={0.3} strokeDasharray="4 4" />
-        </svg>
-        {[0, 1, 2].map(i => (
+        {iconRight && (
+          <div style={{ position:"absolute", right:"14px", top:"50%", transform:"translateY(-50%)", zIndex:1, display:"flex" }}>
+            {iconRight}
+          </div>
+        )}
+        {/* liquid flow line */}
+        <div style={{ position:"absolute", bottom:0, left:0, right:0, height:"2px", pointerEvents:"none", borderRadius:"0 0 13px 13px", overflow:"hidden" }}>
           <motion.div
-            key={i}
-            className="absolute w-3 h-3 rounded-full top-0 left-0"
-            style={{ backgroundColor: theme.accent3, boxShadow: `0 0 10px ${theme.accent3}` }}
-            animate={{ offsetDistance: ["0%", "100%"] }}
-            transition={{ duration: 3, repeat: Infinity, delay: i, ease: "linear" }}
-            style={{ offsetPath: "path('M0,64 Q100,20 200,64 T400,64')", offsetRotate: "auto" } as any}
-          />
-        ))}
-      </div>
-      <div className="w-4 h-4 rounded-full" style={{ backgroundColor: theme.secondary }} />
-    </div>
-  );
-};
-
-// --- Motion Demos ---
-const MotionCard = ({ title, children, theme }: any) => (
-  <div className="p-6 rounded-2xl border flex flex-col items-center justify-center gap-6 h-48 backdrop-blur-md"
-       style={{ backgroundColor: `${theme.surface2}88`, borderColor: `${theme.primary}22` }}>
-    <div className="flex-1 flex items-center justify-center w-full relative">{children}</div>
-    <div className="font-display text-sm tracking-wider uppercase text-center" style={{ color: theme.muted }}>{title}</div>
-  </div>
-);
-
-
-// --- Main Component ---
-export function DesignSystemV3() {
-  const [activeThemeKey, setActiveThemeKey] = useState<Theme>("darkCortex");
-  const theme = THEMES[activeThemeKey];
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [activeChapter, setActiveChapter] = useState(0);
-  const [scrollX, setScrollX] = useState(0);
-
-  const chapters = ["HERO", "GLASS CARDS", "LIQUID STATES", "MOTION LANG", "TYPOGRAPHY", "ICON SYSTEM"];
-
-  const scrollToChapter = (index: number) => {
-    if (containerRef.current) {
-      containerRef.current.scrollTo({
-        left: window.innerWidth * index,
-        behavior: 'smooth'
-      });
-      setActiveChapter(index);
-    }
-  };
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (containerRef.current) {
-        const sl = containerRef.current.scrollLeft;
-        const index = Math.round(sl / window.innerWidth);
-        setActiveChapter(index);
-        setScrollX(sl);
-      }
-    };
-    const ref = containerRef.current;
-    if (ref) ref.addEventListener('scroll', handleScroll, { passive: true });
-    return () => { if (ref) ref.removeEventListener('scroll', handleScroll); };
-  }, []);
-
-  return (
-    <div className="font-body text-base min-h-screen overflow-hidden selection:bg-white/10" style={{ color: theme.text, backgroundColor: theme.bg }}>
-      <GlobalStyles />
-      <LiquidBackground theme={theme} scrollX={scrollX} />
-
-      {/* Navigation Pills */}
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-6 py-3 rounded-full backdrop-blur-xl border"
-           style={{ backgroundColor: `${theme.surface2}AA`, borderColor: `${theme.primary}33` }}>
-        {chapters.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => scrollToChapter(i)}
-            className="w-3 h-3 rounded-full transition-all duration-300"
-            style={{ 
-              backgroundColor: activeChapter === i ? theme.primary : theme.muted,
-              transform: activeChapter === i ? 'scale(1.5)' : 'scale(1)',
-              boxShadow: activeChapter === i ? `0 0 10px ${theme.primary}` : 'none'
+            animate={{ scaleX: focused ? 1 : 0, opacity: focused ? 1 : 0 }}
+            initial={{ scaleX:0, opacity:0 }}
+            transition={{ duration:0.35, ease:[0.4,0,0.2,1] }}
+            style={{
+              position:"absolute", inset:0,
+              background:`linear-gradient(90deg, ${T.primary}, ${T.accent})`,
+              transformOrigin:"left",
+              filter:`drop-shadow(0 0 5px ${T.primary})`,
             }}
           />
+        </div>
+      </div>
+      <AnimatePresence>
+        {error && (
+          <motion.p
+            initial={{ opacity:0, y:-4 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }}
+            style={{ color:T.error, fontSize:"11.5px", marginTop:"5px" }}
+          >{error}</motion.p>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+// ─── Liquid Toggle ───────────────────────────────────────────────────────────
+const LiquidToggle = ({ checked, onChange, label }: { checked:boolean; onChange:(v:boolean)=>void; label?:string }) => (
+  <button onClick={() => onChange(!checked)} style={{ display:"flex", alignItems:"center", gap:"10px", background:"none", border:"none", cursor:"pointer", padding:0 }}>
+    <div style={{
+      position:"relative", width:"46px", height:"26px", borderRadius:"13px",
+      background: checked ? `${T.primary}25` : T.bg2,
+      border:`1px solid ${checked ? T.primary+"55" : T.border}`,
+      transition:"all 0.3s",
+      boxShadow: checked ? `0 0 14px ${T.primary}28` : "none",
+    }}>
+      <motion.div
+        animate={{ x: checked ? 21 : 2 }}
+        transition={{ type:"spring", stiffness:600, damping:32 }}
+        style={{
+          position:"absolute", top:"3px",
+          width:"18px", height:"18px", borderRadius:"50%",
+          background: checked ? T.primary : T.muted,
+          boxShadow: checked ? `0 0 8px ${T.primary}` : "none",
+        }}
+      />
+    </div>
+    {label && <span style={{ color:T.muted, fontSize:"13px", fontFamily:"'DM Sans', sans-serif" }}>{label}</span>}
+  </button>
+);
+
+// ─── Liquid Checkbox ─────────────────────────────────────────────────────────
+const LiquidCheckbox = ({ checked, onChange, children }: { checked:boolean; onChange:(v:boolean)=>void; children:React.ReactNode }) => (
+  <button onClick={() => onChange(!checked)} style={{ display:"flex", alignItems:"flex-start", gap:"10px", background:"none", border:"none", cursor:"pointer", padding:0, textAlign:"left" }}>
+    <div style={{
+      flexShrink:0, width:"20px", height:"20px", borderRadius:"6px", marginTop:"2px",
+      border:`1.5px solid ${checked ? T.primary : T.muted+"55"}`,
+      background: checked ? `${T.primary}18` : "transparent",
+      display:"flex", alignItems:"center", justifyContent:"center",
+      transition:"all 0.25s",
+      boxShadow: checked ? `0 0 12px ${T.primary}28` : "none",
+    }}>
+      <motion.div initial={{ scale:0 }} animate={{ scale: checked ? 1 : 0 }} transition={{ type:"spring", stiffness:600, damping:22 }}>
+        <Check size={11} color={T.primary} strokeWidth={3} />
+      </motion.div>
+    </div>
+    <span style={{ color:T.muted, fontSize:"13px", lineHeight:1.55 }}>{children}</span>
+  </button>
+);
+
+// ─── Password Strength Bar ───────────────────────────────────────────────────
+const StrengthBar = ({ password }: { password:string }) => {
+  const s = password.length === 0 ? 0 : password.length < 6 ? 1 : password.length < 10 ? 2 : /[^a-zA-Z0-9]/.test(password) ? 4 : 3;
+  const cols = ["", T.error, T.secondary, T.secondary, T.success];
+  const labs = ["", "Weak", "Fair", "Good", "Strong"];
+  if (!password) return null;
+  return (
+    <div style={{ marginTop:"8px" }}>
+      <div style={{ display:"flex", gap:"5px", marginBottom:"5px" }}>
+        {[1,2,3,4].map(i => (
+          <motion.div key={i}
+            animate={{ scaleX: s >= i ? 1 : 0, backgroundColor: cols[s] }}
+            initial={{ scaleX:0 }}
+            transition={{ duration:0.3, delay: i * 0.05 }}
+            style={{ flex:1, height:"3px", borderRadius:"2px", transformOrigin:"left", background:T.border }}
+          />
+        ))}
+      </div>
+      <p style={{ fontSize:"11px", color:cols[s] }}>{labs[s]}</p>
+    </div>
+  );
+};
+
+// ─── OTP Input ───────────────────────────────────────────────────────────────
+const OTPInput = ({ value, onChange }: { value:string; onChange:(v:string)=>void }) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const LEN = 6;
+  return (
+    <div style={{ position:"relative" }}>
+      <div style={{ display:"flex", gap:"10px", justifyContent:"center" }} onClick={() => inputRef.current?.focus()}>
+        {Array.from({ length:LEN }).map((_, i) => {
+          const digit = value[i] ?? "";
+          const isActive = value.length === i;
+          return (
+            <motion.div key={i}
+              animate={{ scale: isActive ? 1.07 : 1 }}
+              style={{
+                width:"52px", height:"60px", borderRadius:"13px",
+                border:`1.5px solid ${digit ? T.primary+"99" : isActive ? T.primary+"44" : T.border}`,
+                background: digit ? `${T.primary}0d` : T.bg2,
+                display:"flex", alignItems:"center", justifyContent:"center",
+                fontSize:"22px", fontFamily:"'JetBrains Mono', monospace", fontWeight:700, color:T.text,
+                cursor:"text", position:"relative", overflow:"hidden",
+                boxShadow: digit ? `0 0 18px ${T.primary}1a` : "none",
+                transition:"border-color 0.2s, background 0.2s",
+              }}
+            >
+              {digit ? (
+                <motion.span key={i + digit} initial={{ y:-16, opacity:0 }} animate={{ y:0, opacity:1 }} style={{ position:"absolute" }}>
+                  {digit}
+                </motion.span>
+              ) : isActive ? (
+                <motion.div animate={{ opacity:[1,0] }} transition={{ repeat:Infinity, duration:0.85 }}
+                  style={{ width:"2px", height:"22px", background:T.primary, borderRadius:"2px" }} />
+              ) : null}
+            </motion.div>
+          );
+        })}
+      </div>
+      <input
+        ref={inputRef}
+        type="tel" inputMode="numeric" pattern="[0-9]*"
+        maxLength={LEN} value={value}
+        onChange={e => onChange(e.target.value.replace(/\D/g, "").slice(0, LEN))}
+        style={{ position:"absolute", opacity:0, pointerEvents:"none", width:0, height:0, top:0, left:0 }}
+        autoFocus
+      />
+    </div>
+  );
+};
+
+// ─── Background blobs ────────────────────────────────────────────────────────
+type BlobCfg = { color:string; size:number; cx:string; cy:string; dur:number; delay:number };
+const BlobLayer = ({ blobs }: { blobs:BlobCfg[] }) => (
+  <div style={{ position:"fixed", inset:0, pointerEvents:"none", overflow:"hidden", zIndex:0 }}>
+    <AnimatePresence>
+      {blobs.map((b, i) => (
+        <motion.div key={b.color+i}
+          initial={{ opacity:0, scale:0.75 }}
+          animate={{ opacity:1, scale:1 }}
+          exit={{ opacity:0, scale:0.75 }}
+          transition={{ duration:1.4, ease:[0.4,0,0.2,1] }}
+          style={{
+            position:"absolute",
+            width:b.size, height:b.size,
+            left:b.cx, top:b.cy,
+            transform:"translate(-50%,-50%)",
+            background:b.color,
+            filter:`blur(${Math.round(b.size * 0.19)}px)`,
+            animation:`blobMorph ${b.dur}s ease-in-out infinite`,
+            animationDelay:`${b.delay}s`,
+            mixBlendMode:"screen",
+          }}
+        />
+      ))}
+    </AnimatePresence>
+  </div>
+);
+
+// ─── Page Transition ─────────────────────────────────────────────────────────
+const pv = {
+  initial: { opacity:0, y:18, filter:"blur(5px)" },
+  animate: { opacity:1, y:0,  filter:"blur(0px)" },
+  exit:    { opacity:0, y:-18, filter:"blur(5px)" },
+};
+const pt = { duration:0.38, ease:[0.4,0,0.2,1] as any };
+
+// ─── xSyna Logo ──────────────────────────────────────────────────────────────
+const XSynaLogo = ({ size = 44 }: { size?:number }) => (
+  <svg viewBox="0 0 100 100" style={{ width:size, height:size, display:"block" }}>
+    <defs>
+      <linearGradient id="lg1" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor={T.primary} />
+        <stop offset="100%" stopColor={T.secondary} />
+      </linearGradient>
+    </defs>
+    <path d="M18,18 Q50,50 82,82 M18,82 Q50,50 82,18" stroke="url(#lg1)" strokeWidth="7" strokeLinecap="round" fill="none" />
+    <circle cx="50" cy="50" r="9" fill={T.bg} stroke="url(#lg1)" strokeWidth="4.5" />
+  </svg>
+);
+
+// ─── Section Heading ─────────────────────────────────────────────────────────
+const Heading = ({ title, sub }: { title:string; sub:string }) => (
+  <div style={{ marginBottom:"32px" }}>
+    <h2 className="font-display" style={{ fontSize:"28px", fontWeight:700, lineHeight:1.15, marginBottom:"7px" }}>{title}</h2>
+    <p style={{ color:T.muted, fontSize:"15px" }}>{sub}</p>
+  </div>
+);
+
+// ─── Social button row ───────────────────────────────────────────────────────
+const SocialRow = () => (
+  <>
+    <div style={{ display:"flex", alignItems:"center", gap:"14px", margin:"6px 0" }}>
+      <div style={{ flex:1, height:"1px", background:T.border }} />
+      <span style={{ color:T.muted, fontSize:"11.5px", letterSpacing:"0.05em" }}>or continue with</span>
+      <div style={{ flex:1, height:"1px", background:T.border }} />
+    </div>
+    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px" }}>
+      {["Google","GitHub"].map(name => (
+        <LiquidButton key={name} variant="ghost" fullWidth onClick={() => {}}>
+          <span style={{ fontSize:"14px" }}>{name}</span>
+        </LiquidButton>
+      ))}
+    </div>
+  </>
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SCREENS
+// ─────────────────────────────────────────────────────────────────────────────
+type Screen = "login" | "signup" | "verify" | "reset" | "profile";
+
+const LoginScreen = ({ go }: { go:(s:Screen)=>void }) => {
+  const [email, setEmail] = useState("");
+  const [pw, setPw] = useState("");
+  const [showPw, setShowPw] = useState(false);
+  const [remember, setRemember] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const submit = () => {
+    if (!email || !pw) return;
+    setLoading(true);
+    setTimeout(() => { setLoading(false); go("profile"); }, 1700);
+  };
+
+  return (
+    <motion.div variants={pv} initial="initial" animate="animate" exit="exit" transition={pt} style={{ width:"100%" }}>
+      <Heading title="Welcome back" sub="Sign in to your xSyna account" />
+      <div style={{ display:"flex", flexDirection:"column", gap:"18px" }}>
+        <LiquidInput label="Email" type="email" value={email} onChange={setEmail} icon={Mail} placeholder="you@xsyna.ai" autoComplete="email" />
+        <LiquidInput label="Password" type={showPw ? "text" : "password"} value={pw} onChange={setPw} icon={Lock} placeholder="••••••••" autoComplete="current-password"
+          iconRight={
+            <button onClick={() => setShowPw(v => !v)} style={{ background:"none", border:"none", cursor:"pointer", color:T.muted, padding:0, display:"flex" }}>
+              {showPw ? <EyeOff size={17} strokeWidth={1.6} /> : <Eye size={17} strokeWidth={1.6} />}
+            </button>
+          }
+        />
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+          <LiquidToggle checked={remember} onChange={setRemember} label="Remember me" />
+          <button onClick={() => go("reset")} style={{ background:"none", border:"none", cursor:"pointer", color:T.primary, fontSize:"13px", fontFamily:"'DM Sans', sans-serif" }}>
+            Forgot password?
+          </button>
+        </div>
+        <LiquidButton fullWidth onClick={submit} disabled={loading}>
+          {loading ? <><Spinner />Signing in…</> : <><span>Sign In</span><ArrowRight size={17} /></>}
+        </LiquidButton>
+        <SocialRow />
+      </div>
+      <p style={{ textAlign:"center", marginTop:"28px", color:T.muted, fontSize:"14px" }}>
+        No account?{" "}
+        <button onClick={() => go("signup")} style={{ background:"none", border:"none", cursor:"pointer", color:T.primary, fontFamily:"'DM Sans', sans-serif", fontSize:"14px", fontWeight:600 }}>
+          Sign up free
+        </button>
+      </p>
+    </motion.div>
+  );
+};
+
+// ─── Sign Up ─────────────────────────────────────────────────────────────────
+const SignupScreen = ({ go }: { go:(s:Screen)=>void }) => {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [pw, setPw] = useState("");
+  const [showPw, setShowPw] = useState(false);
+  const [agreed, setAgreed] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const submit = () => {
+    if (!agreed || !name || !email || !pw) return;
+    setLoading(true);
+    setTimeout(() => { setLoading(false); go("verify"); }, 1700);
+  };
+
+  return (
+    <motion.div variants={pv} initial="initial" animate="animate" exit="exit" transition={pt} style={{ width:"100%" }}>
+      <Heading title="Create account" sub="Join the neural network" />
+      <div style={{ display:"flex", flexDirection:"column", gap:"16px" }}>
+        <LiquidInput label="Full name" type="text" value={name} onChange={setName} icon={User} placeholder="Ada Lovelace" autoComplete="name" />
+        <LiquidInput label="Email" type="email" value={email} onChange={setEmail} icon={Mail} placeholder="you@xsyna.ai" autoComplete="email" />
+        <div>
+          <LiquidInput label="Password" type={showPw ? "text" : "password"} value={pw} onChange={setPw} icon={Lock} placeholder="Min. 8 characters" autoComplete="new-password"
+            iconRight={
+              <button onClick={() => setShowPw(v => !v)} style={{ background:"none", border:"none", cursor:"pointer", color:T.muted, padding:0, display:"flex" }}>
+                {showPw ? <EyeOff size={17} strokeWidth={1.6} /> : <Eye size={17} strokeWidth={1.6} />}
+              </button>
+            }
+          />
+          <StrengthBar password={pw} />
+        </div>
+        <LiquidCheckbox checked={agreed} onChange={setAgreed}>
+          I agree to the{" "}<span style={{ color:T.primary }}>Terms of Service</span>{" "}and{" "}<span style={{ color:T.primary }}>Privacy Policy</span>
+        </LiquidCheckbox>
+        <LiquidButton fullWidth onClick={submit} disabled={loading || !agreed}>
+          {loading ? <><Spinner />Creating account…</> : "Create Account"}
+        </LiquidButton>
+        <SocialRow />
+      </div>
+      <p style={{ textAlign:"center", marginTop:"28px", color:T.muted, fontSize:"14px" }}>
+        Already have an account?{" "}
+        <button onClick={() => go("login")} style={{ background:"none", border:"none", cursor:"pointer", color:T.primary, fontFamily:"'DM Sans', sans-serif", fontSize:"14px", fontWeight:600 }}>
+          Sign in
+        </button>
+      </p>
+    </motion.div>
+  );
+};
+
+// ─── Verify OTP ───────────────────────────────────────────────────────────────
+const VerifyScreen = ({ go }: { go:(s:Screen)=>void }) => {
+  const [otp, setOtp] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [cd, setCd] = useState(30);
+
+  useEffect(() => {
+    if (cd <= 0) return;
+    const t = setTimeout(() => setCd(v => v - 1), 1000);
+    return () => clearTimeout(t);
+  }, [cd]);
+
+  const verify = () => {
+    if (otp.length < 6) return;
+    setLoading(true);
+    setTimeout(() => { setLoading(false); go("profile"); }, 1500);
+  };
+
+  return (
+    <motion.div variants={pv} initial="initial" animate="animate" exit="exit" transition={pt} style={{ width:"100%", textAlign:"center" }}>
+      <motion.div initial={{ scale:0.7, opacity:0 }} animate={{ scale:1, opacity:1 }} transition={{ type:"spring", stiffness:300, damping:22 }}
+        style={{ width:"68px", height:"68px", borderRadius:"22px", background:`${T.primary}12`, border:`1px solid ${T.primary}40`, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 22px" }}>
+        <Smartphone size={30} color={T.primary} strokeWidth={1.5} />
+      </motion.div>
+      <Heading title="Verify your email" sub="Enter the 6-digit code we sent you" />
+      <div style={{ marginBottom:"28px" }}>
+        <OTPInput value={otp} onChange={setOtp} />
+      </div>
+      <LiquidButton fullWidth onClick={verify} disabled={loading || otp.length < 6}>
+        {loading ? <><Spinner />Verifying…</> : "Verify Code"}
+      </LiquidButton>
+      <p style={{ marginTop:"22px", color:T.muted, fontSize:"13px" }}>
+        {cd > 0
+          ? <>Resend code in <span className="font-mono" style={{ color:T.primary }}>{cd}s</span></>
+          : <button onClick={() => setCd(30)} style={{ background:"none", border:"none", cursor:"pointer", color:T.primary, fontSize:"13px", fontFamily:"'DM Sans', sans-serif" }}>Resend code</button>
+        }
+      </p>
+      <button onClick={() => go("login")} style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:"5px", background:"none", border:"none", cursor:"pointer", color:T.muted, fontSize:"13px", fontFamily:"'DM Sans', sans-serif", margin:"16px auto 0" }}>
+        <ChevronLeft size={15} />Back to login
+      </button>
+    </motion.div>
+  );
+};
+
+// ─── Reset Password ───────────────────────────────────────────────────────────
+const ResetScreen = ({ go }: { go:(s:Screen)=>void }) => {
+  const [email, setEmail] = useState("");
+  const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const send = () => {
+    if (!email) return;
+    setLoading(true);
+    setTimeout(() => { setLoading(false); setSent(true); }, 1500);
+  };
+
+  return (
+    <motion.div variants={pv} initial="initial" animate="animate" exit="exit" transition={pt} style={{ width:"100%" }}>
+      <AnimatePresence mode="wait">
+        {!sent ? (
+          <motion.div key="form" variants={pv} initial="initial" animate="animate" exit="exit" transition={pt}>
+            <div style={{ width:"68px", height:"68px", borderRadius:"22px", background:`${T.secondary}12`, border:`1px solid ${T.secondary}40`, display:"flex", alignItems:"center", justifyContent:"center", marginBottom:"22px" }}>
+              <Lock size={30} color={T.secondary} strokeWidth={1.5} />
+            </div>
+            <Heading title="Reset password" sub="We'll send you a link to reset it" />
+            <div style={{ display:"flex", flexDirection:"column", gap:"18px" }}>
+              <LiquidInput label="Email" type="email" value={email} onChange={setEmail} icon={Mail} placeholder="you@xsyna.ai" autoComplete="email" />
+              <LiquidButton fullWidth variant="secondary" onClick={send} disabled={loading || !email}>
+                {loading ? <><Spinner color="#000" />Sending…</> : "Send Reset Link"}
+              </LiquidButton>
+            </div>
+            <button onClick={() => go("login")} style={{ display:"flex", alignItems:"center", gap:"5px", background:"none", border:"none", cursor:"pointer", color:T.muted, fontSize:"13px", fontFamily:"'DM Sans', sans-serif", marginTop:"24px" }}>
+              <ChevronLeft size={15} />Back to login
+            </button>
+          </motion.div>
+        ) : (
+          <motion.div key="ok" variants={pv} initial="initial" animate="animate" exit="exit" transition={pt} style={{ textAlign:"center", paddingTop:"16px" }}>
+            <motion.div initial={{ scale:0 }} animate={{ scale:1 }} transition={{ type:"spring", stiffness:300, damping:20, delay:0.1 }}
+              style={{ width:"80px", height:"80px", borderRadius:"26px", background:`${T.success}12`, border:`1px solid ${T.success}50`, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 24px" }}>
+              <Check size={38} color={T.success} strokeWidth={2.2} />
+            </motion.div>
+            <h2 className="font-display" style={{ fontSize:"26px", fontWeight:700, marginBottom:"10px" }}>Check your inbox</h2>
+            <p style={{ color:T.muted, fontSize:"14px", lineHeight:1.7, marginBottom:"32px" }}>
+              We sent a reset link to<br />
+              <span style={{ color:T.text, fontWeight:500 }}>{email}</span>
+            </p>
+            <LiquidButton fullWidth variant="ghost" onClick={() => go("login")}>Back to Login</LiquidButton>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+};
+
+// ─── Profile ──────────────────────────────────────────────────────────────────
+const ProfileScreen = ({ go }: { go:(s:Screen)=>void }) => {
+  const [notifs, setNotifs] = useState(true);
+  const [twoFA, setTwoFA] = useState(false);
+  const [bio, setBio] = useState(true);
+
+  return (
+    <motion.div variants={pv} initial="initial" animate="animate" exit="exit" transition={pt} style={{ width:"100%" }}>
+      {/* Avatar row */}
+      <div style={{ display:"flex", alignItems:"center", gap:"16px", marginBottom:"28px" }}>
+        <div style={{ position:"relative" }}>
+          <motion.div initial={{ scale:0 }} animate={{ scale:1 }} transition={{ type:"spring", stiffness:300, damping:20 }}
+            style={{
+              width:"62px", height:"62px", borderRadius:"20px",
+              background:`linear-gradient(135deg, ${T.primary}28, ${T.accent}28)`,
+              border:`1px solid ${T.primary}40`,
+              display:"flex", alignItems:"center", justifyContent:"center",
+              fontSize:"24px", fontWeight:700, fontFamily:"'Space Grotesk', sans-serif", color:T.primary,
+            }}>A</motion.div>
+          <div style={{ position:"absolute", bottom:"-4px", right:"-4px", width:"18px", height:"18px", borderRadius:"6px", background:T.success, display:"flex", alignItems:"center", justifyContent:"center", border:`2.5px solid ${T.bg}` }}>
+            <Check size={9} strokeWidth={3.5} color={T.bg} />
+          </div>
+        </div>
+        <div style={{ flex:1 }}>
+          <h2 className="font-display" style={{ fontSize:"19px", fontWeight:700, marginBottom:"2px" }}>Ada Lovelace</h2>
+          <p style={{ color:T.muted, fontSize:"13px" }}>ada@xsyna.ai</p>
+        </div>
+        <div style={{ padding:"5px 12px", borderRadius:"20px", background:`${T.primary}15`, border:`1px solid ${T.primary}30`, fontSize:"11px", fontFamily:"'Space Grotesk', sans-serif", fontWeight:700, color:T.primary, letterSpacing:"0.06em" }}>
+          PRO
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"10px", marginBottom:"24px" }}>
+        {[
+          { icon:Zap,      label:"Agents",   val:"12"   },
+          { icon:Activity, label:"Sessions", val:"847"  },
+          { icon:Database, label:"Uptime",   val:"99.9%"},
+        ].map(({ icon:Icon, label, val }) => (
+          <div key={label} style={{
+            background:T.bg2, borderRadius:"14px", border:`1px solid ${T.border}`,
+            padding:"14px 10px", textAlign:"center",
+          }}>
+            <Icon size={16} color={T.muted} strokeWidth={1.5} style={{ margin:"0 auto 6px" }} />
+            <div className="font-display" style={{ fontSize:"19px", fontWeight:700, color:T.primary }}>{val}</div>
+            <div style={{ fontSize:"10px", color:T.muted, marginTop:"2px", letterSpacing:"0.05em" }}>{label}</div>
+          </div>
         ))}
       </div>
 
-      {/* Horizontal Scroll Container */}
-      <div 
-        ref={containerRef}
-        className="flex flex-nowrap overflow-x-auto overflow-y-hidden snap-x snap-mandatory scroll-smooth w-screen h-screen no-scrollbar relative z-10"
-      >
-        
-        {/* CHAPTER 1: HERO */}
-        <section className="flex-shrink-0 w-screen h-screen snap-start flex flex-col items-center justify-center relative px-6">
-          <Logo theme={theme} />
-          
-          <div className="text-center mt-12 space-y-4">
-            <h1 className="font-display text-[5vw] font-bold leading-none tracking-tight">
-              <span className="bg-clip-text text-transparent" style={{ backgroundImage: `linear-gradient(135deg, ${theme.primary}, ${theme.secondary})` }}>
-                Neuromorphic Liquid
-              </span>
-            </h1>
-            <p className="font-mono tracking-[0.2em] text-sm uppercase" style={{ color: theme.muted }}>Design System v3</p>
+      {/* Settings list */}
+      <div style={{ background:T.bg2, borderRadius:"16px", border:`1px solid ${T.border}`, overflow:"hidden", marginBottom:"20px" }}>
+        {[
+          { icon:Bell,        label:"Push notifications", checked:notifs, set:setNotifs },
+          { icon:Shield,      label:"Two-Factor Auth",    checked:twoFA,  set:setTwoFA  },
+          { icon:Fingerprint, label:"Biometric login",   checked:bio,    set:setBio    },
+        ].map(({ icon:Icon, label, checked, set }, i, arr) => (
+          <div key={label} style={{
+            display:"flex", alignItems:"center", justifyContent:"space-between",
+            padding:"15px 18px",
+            borderBottom: i < arr.length - 1 ? `1px solid ${T.border}` : "none",
+          }}>
+            <div style={{ display:"flex", alignItems:"center", gap:"12px" }}>
+              <Icon size={17} color={T.muted} strokeWidth={1.6} />
+              <span style={{ fontSize:"14px" }}>{label}</span>
+            </div>
+            <LiquidToggle checked={checked} onChange={set} />
           </div>
+        ))}
+      </div>
 
-          <div className="flex gap-4 mt-16">
-            {(Object.keys(THEMES) as Theme[]).map((t) => {
-              const isAct = activeThemeKey === t;
-              return (
-                <button
-                  key={t}
-                  onClick={() => setActiveThemeKey(t)}
-                  className="relative px-6 py-3 rounded-full font-display font-bold text-sm overflow-hidden group border transition-all"
-                  style={{ 
-                    borderColor: isAct ? THEMES[t].primary : `${THEMES[t].primary}44`,
-                    color: isAct ? THEMES[t].bg : THEMES[t].text,
-                  }}
-                >
-                  <motion.div 
-                    className="absolute inset-0 z-0"
-                    initial={false}
-                    animate={{ y: isAct ? 0 : '100%' }}
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                    style={{ backgroundColor: THEMES[t].primary }}
-                  />
-                  <span className="relative z-10">{THEMES[t].name}</span>
-                </button>
-              );
-            })}
-          </div>
-        </section>
+      <LiquidButton fullWidth variant="ghost" onClick={() => go("login")}>
+        <LogOut size={16} color={T.error} />
+        <span style={{ color:T.error }}>Sign Out</span>
+      </LiquidButton>
+    </motion.div>
+  );
+};
 
-        {/* CHAPTER 2: GLASS CARDS */}
-        <section className="flex-shrink-0 w-screen h-screen snap-start flex flex-col items-center justify-center px-6 md:px-24">
-          <div className="w-full max-w-5xl mx-auto space-y-12">
-            <div className="text-left">
-              <h2 className="font-display text-5xl font-bold mb-4">Liquid Glass Interfaces</h2>
-              <p className="text-xl" style={{ color: theme.muted }}>Reactive surfaces with true depth mapping.</p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <GlassCard3D title="Neural Sync" subtitle="Biological coupling rate" icon={Brain} stat="99.8%" theme={theme} />
-              <GlassCard3D title="Synaptic Load" subtitle="Current cognitive processing" icon={Cpu} stat="42 TF" theme={theme} />
-              <GlassCard3D title="Data Cortex" subtitle="Retained memory patterns" icon={Database} stat="18.4 PB" theme={theme} />
-              <GlassCard3D title="Bio Pulse" subtitle="System vitality reading" icon={Waves} stat="142 BPM" theme={theme} />
-            </div>
-          </div>
-        </section>
+// ─────────────────────────────────────────────────────────────────────────────
+// ROOT
+// ─────────────────────────────────────────────────────────────────────────────
+type BlobSet = BlobCfg[];
+const BLOBS: Record<Screen, BlobSet> = {
+  login:   [{ color:`${T.primary}22`, size:640, cx:"12%",  cy:"22%", dur:20, delay:0  },
+             { color:`${T.accent}18`,  size:520, cx:"88%",  cy:"72%", dur:27, delay:5  }],
+  signup:  [{ color:`${T.accent}22`,  size:700, cx:"85%",  cy:"12%", dur:22, delay:0  },
+             { color:`${T.primary}15`, size:420, cx:"15%",  cy:"80%", dur:30, delay:6  }],
+  verify:  [{ color:`${T.secondary}20`,size:600, cx:"50%", cy:"40%", dur:18, delay:0  },
+             { color:`${T.primary}12`, size:360, cx:"10%",  cy:"88%", dur:25, delay:4  }],
+  reset:   [{ color:`${T.secondary}20`,size:540, cx:"75%", cy:"28%", dur:21, delay:0  },
+             { color:`${T.accent}14`,  size:400, cx:"20%",  cy:"65%", dur:28, delay:7  }],
+  profile: [{ color:`${T.success}16`, size:580, cx:"65%",  cy:"25%", dur:24, delay:0  },
+             { color:`${T.primary}14`, size:420, cx:"18%",  cy:"72%", dur:20, delay:4  }],
+};
 
-        {/* CHAPTER 3: LIQUID STATES */}
-        <section className="flex-shrink-0 w-screen h-screen snap-start flex flex-col items-center justify-center px-6 md:px-24">
-          <div className="w-full max-w-5xl mx-auto space-y-12">
-             <div className="text-left">
-              <h2 className="font-display text-5xl font-bold mb-4">Fluid States</h2>
-              <p className="text-xl" style={{ color: theme.muted }}>Organic representations of data in motion.</p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-              <div className="space-y-12">
-                <div className="space-y-4">
-                  <h3 className="font-display text-xl font-bold" style={{ color: theme.primary }}>Wave Progress</h3>
-                  <WaveProgressBar theme={theme} />
-                </div>
-                <div className="space-y-4">
-                  <h3 className="font-display text-xl font-bold" style={{ color: theme.accent3 }}>Particle Flow Stream</h3>
-                  <FlowingParticleStream theme={theme} />
-                </div>
-              </div>
-              <div className="flex justify-around items-center h-full">
-                <div className="flex flex-col items-center gap-6">
-                  <h3 className="font-display text-xl font-bold" style={{ color: theme.primary }}>Volumetric Fill</h3>
-                  <LiquidFill theme={theme} />
-                </div>
-                <div className="flex flex-col items-center gap-6">
-                  <h3 className="font-display text-xl font-bold" style={{ color: theme.secondary }}>State Morph</h3>
-                  <MorphingDataChip theme={theme} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+export function DesignSystemV3() {
+  const [screen, setScreen] = useState<Screen>("login");
 
-        {/* CHAPTER 4: MOTION LANGUAGE */}
-        <section className="flex-shrink-0 w-screen h-screen snap-start flex flex-col items-center justify-center px-6 md:px-24 overflow-y-auto">
-          <div className="w-full max-w-5xl mx-auto space-y-12 py-12">
-            <div className="text-left">
-              <h2 className="font-display text-5xl font-bold mb-4">Motion Language</h2>
-              <p className="text-xl" style={{ color: theme.muted }}>Physics-based interactions that feel alive.</p>
-            </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-              <MotionCard title="Spring Bounce" theme={theme}>
-                <motion.div className="w-12 h-12 rounded-full" style={{ backgroundColor: theme.primary }}
-                  animate={{ y: [-40, 40] }} transition={{ type: "spring", bounce: 0.7, duration: 1.5, repeat: Infinity, repeatType: "reverse" }} />
-              </MotionCard>
-              
-              <MotionCard title="Liquid Ease" theme={theme}>
-                <motion.div className="w-12 h-12 rounded-2xl" style={{ backgroundColor: theme.secondary }}
-                  animate={{ x: [-50, 50] }} transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1], repeat: Infinity, repeatType: "reverse" }} />
-              </MotionCard>
-              
-              <MotionCard title="Morph" theme={theme}>
-                <motion.div className="w-16 h-16" style={{ backgroundColor: theme.accent3 }}
-                  animate={{ borderRadius: ["50%", "10px"] }} transition={{ duration: 1.5, ease: "easeInOut", repeat: Infinity, repeatType: "reverse" }} />
-              </MotionCard>
-              
-              <MotionCard title="Ripple" theme={theme}>
-                <div className="relative flex items-center justify-center">
-                  <div className="w-4 h-4 rounded-full z-10" style={{ backgroundColor: theme.primary }} />
-                  <motion.div className="absolute w-16 h-16 rounded-full border-2" style={{ borderColor: theme.primary }}
-                    animate={{ scale: [0, 2], opacity: [1, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: "easeOut" }} />
-                </div>
-              </MotionCard>
-              
-              <MotionCard title="Pulse" theme={theme}>
-                 <motion.div className="w-12 h-12 rounded-full" style={{ backgroundColor: `${theme.secondary}44`, boxShadow: `0 0 20px ${theme.secondary}` }}
-                  animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} />
-              </MotionCard>
-              
-              <MotionCard title="Flow" theme={theme}>
-                 <motion.div animate={{ x: [-20, 20, -20] }} transition={{ duration: 3, ease: "linear", repeat: Infinity }}>
-                   <ArrowRight size={32} color={theme.accent3} />
-                 </motion.div>
-              </MotionCard>
-            </div>
-          </div>
-        </section>
+  return (
+    <div className="sso-wrap" style={{ position:"relative" }}>
+      <GlobalStyles />
+      <BlobLayer blobs={BLOBS[screen]} />
 
-        {/* CHAPTER 5: TYPOGRAPHY */}
-        <section className="flex-shrink-0 w-screen h-screen snap-start flex flex-col items-center justify-center px-6 md:px-24">
-          <div className="w-full max-w-6xl mx-auto space-y-12">
-            <div className="text-left">
-              <h2 className="font-display text-5xl font-bold mb-4">Type System</h2>
-              <p className="text-xl" style={{ color: theme.muted }}>Geometric precision meets organic flow.</p>
-            </div>
-            
-            <div className="flex flex-col lg:flex-row gap-16 items-start">
-              <div className="flex-1 space-y-8">
-                <h3 className="font-display text-[6vw] font-bold leading-[0.9] tracking-tighter bg-clip-text text-transparent"
-                    style={{ backgroundImage: `linear-gradient(to right, ${theme.primary}, ${theme.accent3})` }}>
-                  Space<br/>Grotesk
-                </h3>
-                <div className="font-mono text-sm p-6 rounded-xl border bg-black/40" style={{ borderColor: `${theme.primary}33`, color: theme.text }}>
-                  <span style={{ color: theme.primary }}>const</span> typography = {'{\n'}
-                  {'  '}display: <span style={{ color: theme.secondary }}>'Space Grotesk'</span>,\n
-                  {'  '}body: <span style={{ color: theme.secondary }}>'DM Sans'</span>\n
-                  {'}'}<motion.span animate={{ opacity: [1, 0] }} transition={{ repeat: Infinity, duration: 0.8 }} style={{ color: theme.primary }}>_</motion.span>
-                </div>
-              </div>
-              
-              <div className="flex-1 space-y-6 font-display text-right w-full">
-                <div className="flex justify-end items-center gap-6 border-b pb-4" style={{ borderColor: `${theme.muted}44` }}>
-                  <span className="text-sm font-mono" style={{ color: theme.muted }}>W200</span>
-                  <p className="text-4xl font-extralight">Liquid State</p>
-                </div>
-                <div className="flex justify-end items-center gap-6 border-b pb-4" style={{ borderColor: `${theme.muted}44` }}>
-                  <span className="text-sm font-mono" style={{ color: theme.muted }}>W400</span>
-                  <p className="text-4xl font-normal">Liquid State</p>
-                </div>
-                <div className="flex justify-end items-center gap-6 border-b pb-4" style={{ borderColor: `${theme.muted}44` }}>
-                  <span className="text-sm font-mono" style={{ color: theme.muted }}>W600</span>
-                  <p className="text-4xl font-semibold">Liquid State</p>
-                </div>
-                <div className="flex justify-end items-center gap-6">
-                  <span className="text-sm font-mono" style={{ color: theme.muted }}>W800</span>
-                  <p className="text-4xl font-extrabold text-transparent bg-clip-text" style={{ backgroundImage: `linear-gradient(to right, ${theme.secondary}, ${theme.primary})` }}>Liquid State</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+      <div style={{
+        position:"relative", zIndex:10,
+        width:"100%", maxWidth:"440px",
+        margin:"0 auto",
+      }}>
+        {/* Logo */}
+        <motion.div
+          style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:"8px", marginBottom:"40px" }}
+          initial={{ opacity:0, y:-12 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.5 }}
+        >
+          <XSynaLogo size={46} />
+          <span className="font-display" style={{ fontSize:"11px", fontWeight:700, letterSpacing:"0.22em", color:T.muted, textTransform:"uppercase" }}>
+            xSyna SSO
+          </span>
+        </motion.div>
 
-        {/* CHAPTER 6: ICON SYSTEM */}
-        <section className="flex-shrink-0 w-screen h-screen snap-start flex flex-col items-center justify-center px-6 md:px-24">
-          <div className="w-full max-w-5xl mx-auto space-y-12">
-            <div className="text-left">
-              <h2 className="font-display text-5xl font-bold mb-4">Glyph Protocol</h2>
-              <p className="text-xl" style={{ color: theme.muted }}>Symbols of the neural architecture.</p>
-            </div>
-            
-            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-              {[
-                { icon: Brain, name: "Cortex" },
-                { icon: Waves, name: "Pulse" },
-                { icon: Droplets, name: "Liquid" },
-                { icon: Zap, name: "Energy" },
-                { icon: Network, name: "Synapse" },
-                { icon: Cpu, name: "Process" },
-                { icon: Shield, name: "Secure" },
-                { icon: Layers, name: "Depth" },
-                { icon: Orbit, name: "Orbit" },
-                { icon: Activity, name: "Vitals" },
-                { icon: Database, name: "Memory" },
-                { icon: Sparkles, name: "Magic" },
-              ].map((item, i) => (
-                <motion.div
-                  key={i}
-                  className="relative group flex flex-col items-center justify-center p-6 rounded-2xl border backdrop-blur-md cursor-pointer"
-                  style={{ backgroundColor: `${theme.surface2}88`, borderColor: `${theme.surface1}` }}
-                  whileHover="hover"
-                  initial="rest"
-                >
-                  <motion.div 
-                    className="absolute inset-0 rounded-2xl opacity-0"
-                    variants={{
-                      hover: { opacity: 1, boxShadow: `inset 0 0 20px ${theme.primary}44, 0 0 10px ${theme.primary}66`, borderColor: theme.primary }
-                    }}
-                    transition={{ duration: 0.3 }}
-                  />
-                  <motion.div
-                    className="absolute inset-0 rounded-2xl border-2 opacity-0"
-                    style={{ borderColor: theme.primary }}
-                    variants={{
-                      hover: { scale: 1.2, opacity: 0, transition: { duration: 0.8, ease: "easeOut" } }
-                    }}
-                  />
-                  
-                  <motion.div
-                    variants={{
-                      rest: { scale: 1, color: theme.text },
-                      hover: { scale: 1.2, color: theme.primary, transition: { type: "spring", stiffness: 400, damping: 10 } }
-                    }}
-                    className="relative z-10 mb-4"
-                  >
-                    <item.icon size={32} strokeWidth={1.5} />
-                  </motion.div>
-                  <span className="text-xs font-mono tracking-widest uppercase relative z-10" style={{ color: theme.muted }}>{item.name}</span>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-
+        {/* Screen */}
+        <AnimatePresence mode="wait">
+          {screen === "login"   && <LoginScreen   key="login"   go={setScreen} />}
+          {screen === "signup"  && <SignupScreen  key="signup"  go={setScreen} />}
+          {screen === "verify"  && <VerifyScreen  key="verify"  go={setScreen} />}
+          {screen === "reset"   && <ResetScreen   key="reset"   go={setScreen} />}
+          {screen === "profile" && <ProfileScreen key="profile" go={setScreen} />}
+        </AnimatePresence>
       </div>
     </div>
   );
