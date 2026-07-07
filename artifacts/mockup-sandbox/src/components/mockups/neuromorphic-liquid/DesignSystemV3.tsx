@@ -105,7 +105,7 @@ const GlobalStyles = () => (
 );
 
 // --- Background Component ---
-const LiquidBackground = ({ theme }: { theme: typeof THEMES[Theme] }) => {
+const LiquidBackground = ({ theme, scrollX }: { theme: typeof THEMES[Theme]; scrollX: number }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Ripple effect on interaction
@@ -139,7 +139,7 @@ const LiquidBackground = ({ theme }: { theme: typeof THEMES[Theme] }) => {
 
         ctx.beginPath();
         ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
-        ctx.strokeStyle = \`\${theme.primary}\${Math.floor(r.alpha * 255).toString(16).padStart(2, '0')}\`;
+        ctx.strokeStyle = `${theme.primary}${Math.floor(r.alpha * 255).toString(16).padStart(2, '0')}`;
         ctx.lineWidth = 2;
         ctx.stroke();
       }
@@ -171,27 +171,33 @@ const LiquidBackground = ({ theme }: { theme: typeof THEMES[Theme] }) => {
 
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 bg-sweep"
-         style={{ background: \`linear-gradient(45deg, \${theme.bg}, \${theme.surface1}, \${theme.bg})\` }}>
+         style={{ background: `linear-gradient(45deg, ${theme.bg}, ${theme.surface1}, ${theme.bg})` }}>
       
       {/* Flowing gradient bands */}
       <div className="absolute inset-0 opacity-20 bg-sweep mix-blend-screen"
-           style={{ backgroundImage: \`linear-gradient(120deg, transparent, \${theme.primary}22, transparent, \${theme.accent3}22, transparent)\` }} />
+           style={{ backgroundImage: `linear-gradient(120deg, transparent, ${theme.primary}22, transparent, ${theme.accent3}22, transparent)` }} />
 
-      {/* Morphing Blobs */}
+      {/* Morphing Blobs — 3D parallax depth layers */}
+      {/* Layer 1: farthest back, slowest parallax (depth factor 0.05) */}
       <motion.div 
         className="blob-1 absolute blur-[100px] rounded-full mix-blend-screen"
-        style={{ width: '800px', height: '800px', backgroundColor: \`\${theme.primary}1A\`, left: '-20%', top: '-20%' }}
-        animate={{ x: [0, 100, 0], y: [0, 50, 0] }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+        style={{ width: '800px', height: '800px', backgroundColor: `${theme.primary}1A`, left: '-20%', top: '-20%' }}
+        animate={{ x: [0 - scrollX * 0.05, 100 - scrollX * 0.05, 0 - scrollX * 0.05], y: [0, 50, 0] }}
+        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
       />
+      {/* Layer 2: mid depth (depth factor 0.12) */}
       <motion.div 
         className="blob-2 absolute blur-[120px] rounded-full mix-blend-screen"
-        style={{ width: '900px', height: '900px', backgroundColor: \`\${theme.secondary}14\`, right: '-10%', bottom: '-10%' }}
-        animate={{ x: [0, -100, 0], y: [0, -50, 0] }} transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+        style={{ width: '900px', height: '900px', backgroundColor: `${theme.secondary}14`, right: '-10%', bottom: '-10%' }}
+        animate={{ x: [0 - scrollX * 0.12, -100 - scrollX * 0.12, 0 - scrollX * 0.12], y: [0, -50, 0] }}
+        transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
       />
+      {/* Layer 3: closest, fastest parallax (depth factor 0.22) */}
       <motion.div 
         className="blob-3 absolute blur-[90px] rounded-full mix-blend-screen"
-        style={{ width: '600px', height: '600px', backgroundColor: \`\${theme.accent3}0F\`, left: '40%', top: '30%' }}
-        animate={{ x: [0, 50, -50, 0], y: [0, -50, 50, 0] }} transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+        style={{ width: '600px', height: '600px', backgroundColor: `${theme.accent3}0F`, left: '40%', top: '30%' }}
+        animate={{ x: [0 - scrollX * 0.22, 50 - scrollX * 0.22, -50 - scrollX * 0.22, 0 - scrollX * 0.22], y: [0, -50, 50, 0] }}
+        transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
       />
       
       {/* Ripple Canvas */}
@@ -275,14 +281,14 @@ const GlassCard3D = ({ title, subtitle, icon: Icon, stat, theme }: any) => {
       <div 
         className="absolute w-40 h-40 rounded-full mix-blend-screen pointer-events-none transition-opacity duration-300"
         style={{ 
-          background: \`radial-gradient(circle, \${theme.primary}44 0%, transparent 70%)\`,
-          transform: \`translate(\${blobPos.x - 80}px, \${blobPos.y - 80}px)\`,
+          background: `radial-gradient(circle, ${theme.primary}44 0%, transparent 70%)`,
+          transform: `translate(${blobPos.x - 80}px, ${blobPos.y - 80}px)`,
           opacity: isHovered ? 1 : 0
         }}
       />
       
       <div className="relative z-10 flex items-start justify-between">
-        <div className="p-4 rounded-2xl" style={{ backgroundColor: \`\${theme.primary}22\`, color: theme.primary }}>
+        <div className="p-4 rounded-2xl" style={{ backgroundColor: `${theme.primary}22`, color: theme.primary }}>
           <Icon size={32} strokeWidth={1.5} />
         </div>
         <div className="text-right">
@@ -301,7 +307,7 @@ const GlassCard3D = ({ title, subtitle, icon: Icon, stat, theme }: any) => {
 // --- Liquid States Demos ---
 const WaveProgressBar = ({ theme }: { theme: any }) => {
   return (
-    <div className="h-12 w-full relative rounded-full overflow-hidden border" style={{ borderColor: \`\${theme.primary}33\`, backgroundColor: \`\${theme.surface1}88\` }}>
+    <div className="h-12 w-full relative rounded-full overflow-hidden border" style={{ borderColor: `${theme.primary}33`, backgroundColor: `${theme.surface1}88` }}>
       <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
         <motion.path
           d="M0,24 Q50,0 100,24 T200,24 T300,24 T400,24 T500,24 V48 H0 Z"
@@ -324,7 +330,7 @@ const WaveProgressBar = ({ theme }: { theme: any }) => {
 
 const LiquidFill = ({ theme }: { theme: any }) => {
   return (
-    <div className="w-32 h-32 rounded-full border-4 relative overflow-hidden flex items-center justify-center" style={{ borderColor: \`\${theme.primary}44\`, backgroundColor: \`\${theme.surface1}\` }}>
+    <div className="w-32 h-32 rounded-full border-4 relative overflow-hidden flex items-center justify-center" style={{ borderColor: `${theme.primary}44`, backgroundColor: `${theme.surface1}` }}>
       <motion.div
         className="absolute bottom-0 w-[200%] h-[200%] blob-1"
         style={{ backgroundColor: theme.primary, opacity: 0.8, borderRadius: '40%' }}
@@ -340,7 +346,7 @@ const MorphingDataChip = ({ theme }: { theme: any }) => {
   return (
     <motion.div
       className="w-32 h-32 flex items-center justify-center font-body text-sm font-bold text-center"
-      style={{ backgroundColor: \`\${theme.secondary}22\`, color: theme.secondary, border: \`1px solid \${theme.secondary}66\` }}
+      style={{ backgroundColor: `${theme.secondary}22`, color: theme.secondary, border: `1px solid ${theme.secondary}66` }}
       animate={{ borderRadius: ["20%", "50%", "30%", "40%", "20%"] }}
       transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
     >
@@ -351,7 +357,7 @@ const MorphingDataChip = ({ theme }: { theme: any }) => {
 
 const FlowingParticleStream = ({ theme }: { theme: any }) => {
   return (
-    <div className="relative w-full h-32 flex items-center border rounded-2xl px-6" style={{ borderColor: \`\${theme.accent3}44\`, backgroundColor: \`\${theme.surface1}88\` }}>
+    <div className="relative w-full h-32 flex items-center border rounded-2xl px-6" style={{ borderColor: `${theme.accent3}44`, backgroundColor: `${theme.surface1}88` }}>
       <div className="w-4 h-4 rounded-full" style={{ backgroundColor: theme.primary }} />
       <div className="flex-1 relative h-full">
         <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
@@ -361,7 +367,7 @@ const FlowingParticleStream = ({ theme }: { theme: any }) => {
           <motion.div
             key={i}
             className="absolute w-3 h-3 rounded-full top-0 left-0"
-            style={{ backgroundColor: theme.accent3, boxShadow: \`0 0 10px \${theme.accent3}\` }}
+            style={{ backgroundColor: theme.accent3, boxShadow: `0 0 10px ${theme.accent3}` }}
             animate={{ offsetDistance: ["0%", "100%"] }}
             transition={{ duration: 3, repeat: Infinity, delay: i, ease: "linear" }}
             style={{ offsetPath: "path('M0,64 Q100,20 200,64 T400,64')", offsetRotate: "auto" } as any}
@@ -376,7 +382,7 @@ const FlowingParticleStream = ({ theme }: { theme: any }) => {
 // --- Motion Demos ---
 const MotionCard = ({ title, children, theme }: any) => (
   <div className="p-6 rounded-2xl border flex flex-col items-center justify-center gap-6 h-48 backdrop-blur-md"
-       style={{ backgroundColor: \`\${theme.surface2}88\`, borderColor: \`\${theme.primary}22\` }}>
+       style={{ backgroundColor: `${theme.surface2}88`, borderColor: `${theme.primary}22` }}>
     <div className="flex-1 flex items-center justify-center w-full relative">{children}</div>
     <div className="font-display text-sm tracking-wider uppercase text-center" style={{ color: theme.muted }}>{title}</div>
   </div>
@@ -389,6 +395,7 @@ export function DesignSystemV3() {
   const theme = THEMES[activeThemeKey];
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeChapter, setActiveChapter] = useState(0);
+  const [scrollX, setScrollX] = useState(0);
 
   const chapters = ["HERO", "GLASS CARDS", "LIQUID STATES", "MOTION LANG", "TYPOGRAPHY", "ICON SYSTEM"];
 
@@ -405,23 +412,25 @@ export function DesignSystemV3() {
   useEffect(() => {
     const handleScroll = () => {
       if (containerRef.current) {
-        const index = Math.round(containerRef.current.scrollLeft / window.innerWidth);
+        const sl = containerRef.current.scrollLeft;
+        const index = Math.round(sl / window.innerWidth);
         setActiveChapter(index);
+        setScrollX(sl);
       }
     };
     const ref = containerRef.current;
-    if (ref) ref.addEventListener('scroll', handleScroll);
+    if (ref) ref.addEventListener('scroll', handleScroll, { passive: true });
     return () => { if (ref) ref.removeEventListener('scroll', handleScroll); };
   }, []);
 
   return (
     <div className="font-body text-base min-h-screen overflow-hidden selection:bg-white/10" style={{ color: theme.text, backgroundColor: theme.bg }}>
       <GlobalStyles />
-      <LiquidBackground theme={theme} />
+      <LiquidBackground theme={theme} scrollX={scrollX} />
 
       {/* Navigation Pills */}
       <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-6 py-3 rounded-full backdrop-blur-xl border"
-           style={{ backgroundColor: \`\${theme.surface2}AA\`, borderColor: \`\${theme.primary}33\` }}>
+           style={{ backgroundColor: `${theme.surface2}AA`, borderColor: `${theme.primary}33` }}>
         {chapters.map((_, i) => (
           <button
             key={i}
@@ -430,7 +439,7 @@ export function DesignSystemV3() {
             style={{ 
               backgroundColor: activeChapter === i ? theme.primary : theme.muted,
               transform: activeChapter === i ? 'scale(1.5)' : 'scale(1)',
-              boxShadow: activeChapter === i ? \`0 0 10px \${theme.primary}\` : 'none'
+              boxShadow: activeChapter === i ? `0 0 10px ${theme.primary}` : 'none'
             }}
           />
         ))}
@@ -448,7 +457,7 @@ export function DesignSystemV3() {
           
           <div className="text-center mt-12 space-y-4">
             <h1 className="font-display text-[5vw] font-bold leading-none tracking-tight">
-              <span className="bg-clip-text text-transparent" style={{ backgroundImage: \`linear-gradient(135deg, \${theme.primary}, \${theme.secondary})\` }}>
+              <span className="bg-clip-text text-transparent" style={{ backgroundImage: `linear-gradient(135deg, ${theme.primary}, ${theme.secondary})` }}>
                 Neuromorphic Liquid
               </span>
             </h1>
@@ -464,7 +473,7 @@ export function DesignSystemV3() {
                   onClick={() => setActiveThemeKey(t)}
                   className="relative px-6 py-3 rounded-full font-display font-bold text-sm overflow-hidden group border transition-all"
                   style={{ 
-                    borderColor: isAct ? THEMES[t].primary : \`\${THEMES[t].primary}44\`,
+                    borderColor: isAct ? THEMES[t].primary : `${THEMES[t].primary}44`,
                     color: isAct ? THEMES[t].bg : THEMES[t].text,
                   }}
                 >
@@ -565,7 +574,7 @@ export function DesignSystemV3() {
               </MotionCard>
               
               <MotionCard title="Pulse" theme={theme}>
-                 <motion.div className="w-12 h-12 rounded-full" style={{ backgroundColor: \`\${theme.secondary}44\`, boxShadow: \`0 0 20px \${theme.secondary}\` }}
+                 <motion.div className="w-12 h-12 rounded-full" style={{ backgroundColor: `${theme.secondary}44`, boxShadow: `0 0 20px ${theme.secondary}` }}
                   animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} />
               </MotionCard>
               
@@ -589,10 +598,10 @@ export function DesignSystemV3() {
             <div className="flex flex-col lg:flex-row gap-16 items-start">
               <div className="flex-1 space-y-8">
                 <h3 className="font-display text-[6vw] font-bold leading-[0.9] tracking-tighter bg-clip-text text-transparent"
-                    style={{ backgroundImage: \`linear-gradient(to right, \${theme.primary}, \${theme.accent3})\` }}>
+                    style={{ backgroundImage: `linear-gradient(to right, ${theme.primary}, ${theme.accent3})` }}>
                   Space<br/>Grotesk
                 </h3>
-                <div className="font-mono text-sm p-6 rounded-xl border bg-black/40" style={{ borderColor: \`\${theme.primary}33\`, color: theme.text }}>
+                <div className="font-mono text-sm p-6 rounded-xl border bg-black/40" style={{ borderColor: `${theme.primary}33`, color: theme.text }}>
                   <span style={{ color: theme.primary }}>const</span> typography = {'{\n'}
                   {'  '}display: <span style={{ color: theme.secondary }}>'Space Grotesk'</span>,\n
                   {'  '}body: <span style={{ color: theme.secondary }}>'DM Sans'</span>\n
@@ -601,21 +610,21 @@ export function DesignSystemV3() {
               </div>
               
               <div className="flex-1 space-y-6 font-display text-right w-full">
-                <div className="flex justify-end items-center gap-6 border-b pb-4" style={{ borderColor: \`\${theme.muted}44\` }}>
+                <div className="flex justify-end items-center gap-6 border-b pb-4" style={{ borderColor: `${theme.muted}44` }}>
                   <span className="text-sm font-mono" style={{ color: theme.muted }}>W200</span>
                   <p className="text-4xl font-extralight">Liquid State</p>
                 </div>
-                <div className="flex justify-end items-center gap-6 border-b pb-4" style={{ borderColor: \`\${theme.muted}44\` }}>
+                <div className="flex justify-end items-center gap-6 border-b pb-4" style={{ borderColor: `${theme.muted}44` }}>
                   <span className="text-sm font-mono" style={{ color: theme.muted }}>W400</span>
                   <p className="text-4xl font-normal">Liquid State</p>
                 </div>
-                <div className="flex justify-end items-center gap-6 border-b pb-4" style={{ borderColor: \`\${theme.muted}44\` }}>
+                <div className="flex justify-end items-center gap-6 border-b pb-4" style={{ borderColor: `${theme.muted}44` }}>
                   <span className="text-sm font-mono" style={{ color: theme.muted }}>W600</span>
                   <p className="text-4xl font-semibold">Liquid State</p>
                 </div>
                 <div className="flex justify-end items-center gap-6">
                   <span className="text-sm font-mono" style={{ color: theme.muted }}>W800</span>
-                  <p className="text-4xl font-extrabold text-transparent bg-clip-text" style={{ backgroundImage: \`linear-gradient(to right, \${theme.secondary}, \${theme.primary})\` }}>Liquid State</p>
+                  <p className="text-4xl font-extrabold text-transparent bg-clip-text" style={{ backgroundImage: `linear-gradient(to right, ${theme.secondary}, ${theme.primary})` }}>Liquid State</p>
                 </div>
               </div>
             </div>
@@ -648,14 +657,14 @@ export function DesignSystemV3() {
                 <motion.div
                   key={i}
                   className="relative group flex flex-col items-center justify-center p-6 rounded-2xl border backdrop-blur-md cursor-pointer"
-                  style={{ backgroundColor: \`\${theme.surface2}88\`, borderColor: \`\${theme.surface1}\` }}
+                  style={{ backgroundColor: `${theme.surface2}88`, borderColor: `${theme.surface1}` }}
                   whileHover="hover"
                   initial="rest"
                 >
                   <motion.div 
                     className="absolute inset-0 rounded-2xl opacity-0"
                     variants={{
-                      hover: { opacity: 1, boxShadow: \`inset 0 0 20px \${theme.primary}44, 0 0 10px \${theme.primary}66\`, borderColor: theme.primary }
+                      hover: { opacity: 1, boxShadow: `inset 0 0 20px ${theme.primary}44, 0 0 10px ${theme.primary}66`, borderColor: theme.primary }
                     }}
                     transition={{ duration: 0.3 }}
                   />
