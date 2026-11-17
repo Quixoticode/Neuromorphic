@@ -125,28 +125,29 @@ const NeuralCanvas = () => {
 export const AnimatedXSynaLogo = ({ className = "w-32 h-32" }) => (
   <svg className={className} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
     <defs>
-      <linearGradient id="logoGradAnim" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor={THEME.primary} />
-        <stop offset="100%" stopColor={THEME.secondary} />
+      <linearGradient id="logoGradAnim" gradientUnits="userSpaceOnUse" x1="20" y1="20" x2="80" y2="80">
+        <stop offset="0%" stopColor="#9ffcff"/><stop offset="50%" stopColor="#b6f5b4"/><stop offset="100%" stopColor="#ffdf66"/>
       </linearGradient>
     </defs>
-    <motion.path 
-      d="M20,20 Q50,50 80,80 M20,80 Q50,50 80,20" 
-      stroke="url(#logoGradAnim)" 
-      strokeWidth="6" 
-      strokeLinecap="round" 
+    <motion.path
+      d="M20,20.6 C32.7,20.6 41.7,28.3 50,50 M80,20.6 C67.3,20.6 58.3,28.3 50,50 M20,79.4 C32.7,79.4 41.7,71.7 50,50 M80,79.4 C67.3,79.4 58.3,71.7 50,50"
+      stroke="url(#logoGradAnim)"
+      strokeWidth="7.8"
+      strokeLinecap="round"
       initial={{ pathLength: 0 }}
       animate={{ pathLength: 1 }}
       transition={{ duration: 2, ease: "easeInOut" }}
     />
-    <motion.circle 
-      cx="50" cy="50" r="12" 
-      fill={THEME.bg} 
-      stroke="url(#logoGradAnim)" 
-      strokeWidth="4" 
-      animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
-      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-    />
+    <motion.g
+      initial={{ scale: 0, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ duration: 1, delay: 1, type: "spring" }}
+      style={{ transformOrigin: "50px 50px" }}
+    >
+      <circle cx="50" cy="50" r="11.9" fill="url(#logoGradAnim)" />
+      <circle cx="50" cy="50" r="7.8" fill="#0d1117" />
+      <motion.circle cx="50" cy="50" r="4" fill="#fff" animate={{ opacity: [0.7, 1, 0.7] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} />
+    </motion.g>
   </svg>
 );
 

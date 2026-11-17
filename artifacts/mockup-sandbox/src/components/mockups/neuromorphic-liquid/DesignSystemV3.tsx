@@ -210,9 +210,11 @@ const StrengthBar=({password}:{password:string})=>{
 
 const XSynaLogo=({size=40}:{size?:number})=>(
   <svg viewBox="0 0 100 100" style={{width:size,height:size,display:"block"}}>
-    <defs><linearGradient id="xlg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor={T.primary}/><stop offset="100%" stopColor={T.secondary}/></linearGradient></defs>
-    <path d="M18,18 Q50,50 82,82 M18,82 Q50,50 82,18" stroke="url(#xlg)" strokeWidth="7" strokeLinecap="round" fill="none"/>
-    <circle cx="50" cy="50" r="9" fill={T.bg} stroke="url(#xlg)" strokeWidth="4.5"/>
+    <defs><linearGradient id="xlg" gradientUnits="userSpaceOnUse" x1="20" y1="20" x2="80" y2="80"><stop offset="0%" stopColor="#9ffcff"/><stop offset="50%" stopColor="#b6f5b4"/><stop offset="100%" stopColor="#ffdf66"/></linearGradient></defs>
+    <path d="M20,20.6 C32.7,20.6 41.7,28.3 50,50 M80,20.6 C67.3,20.6 58.3,28.3 50,50 M20,79.4 C32.7,79.4 41.7,71.7 50,50 M80,79.4 C67.3,79.4 58.3,71.7 50,50" stroke="url(#xlg)" strokeWidth="7.8" strokeLinecap="round" fill="none"/>
+    <circle cx="50" cy="50" r="11.9" fill="url(#xlg)"/>
+    <circle cx="50" cy="50" r="7.8" fill="#0d1117"/>
+    <circle cx="50" cy="50" r="4" fill="#fff"/>
   </svg>
 );
 
